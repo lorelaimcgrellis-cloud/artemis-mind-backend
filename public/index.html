@@ -766,7 +766,6 @@ Bad questions (NEVER use these):
 TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Never "interesting" as filler.`;
 
         function ArtemisApp() {
-            const [activeTab, setActiveTab] = useState('artemis');
             const [apiKey, setApiKey] = useState(localStorage.getItem('artemis_api_key') || '');
             const [showApiKeyModal, setShowApiKeyModal] = useState(!localStorage.getItem('artemis_api_key'));
             const [sessions, setSessions] = useState([]);
@@ -1130,27 +1129,6 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                         </div>
                     )}
 
-                    <div className="top-nav">
-                        <div className="nav-tabs">
-                            <button 
-                                className={`nav-tab ${activeTab === 'artemis' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('artemis')}
-                            >
-                                Artemis
-                            </button>
-                            <button 
-                                className={`nav-tab ${activeTab === 'focus' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('focus')}
-                            >
-                                Focus
-                            </button>
-                        </div>
-                        <div className="nav-settings" onClick={() => setShowApiKeyModal(true)}>
-                            API Settings
-                        </div>
-                    </div>
-
-                    {activeTab === 'artemis' && (
                     <div className="app-container">
                         <div className="sidebar">
                             <div className="sidebar-header">
@@ -1198,6 +1176,8 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                                     </div>
                                 ))}
                             </div>
+
+                            <FocusTrackerSidebar />
                         </div>
 
                         <div className="main-content">
@@ -1282,20 +1262,16 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                             )}
                         </div>
                     </div>
-                    )}
-
-                    {activeTab === 'focus' && <FocusTracker />}
                 </>
             );
         }
 
-        function FocusTracker() {
+        function FocusTrackerSidebar() {
             const [sessions, setSessions] = useState([]);
             const [activeSession, setActiveSession] = useState(null);
             const [commitment, setCommitment] = useState('');
-            const [duration, setDuration] = useState(null);
             const [elapsedTime, setElapsedTime] = useState(0);
-            const [view, setView] = useState('active');
+            const [showHistory, setShowHistory] = useState(false);
 
             // Load sessions from localStorage on mount
             useEffect(() => {
@@ -1334,7 +1310,6 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                 const session = {
                     id: Date.now(),
                     commitment: commitment.trim(),
-                    duration,
                     startTime: Date.now(),
                     checkIns: [],
                     outcome: null
@@ -1343,34 +1318,42 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                 setActiveSession(session);
                 localStorage.setItem('activeSession', JSON.stringify(session));
                 setCommitment('');
-                setDuration(null);
-                setView('active');
             };
 
-            const addCheckIn = (status, note = '') => {
+            const addCheckIn = (status) => {
                 const updated = {
                     ...activeSession,
                     checkIns: [
                         ...activeSession.checkIns,
-                        { time: Date.now(), status, note }
+                        { time: Date.now(), status }
                     ]
                 };
                 setActiveSession(updated);
                 localStorage.setItem('activeSession', JSON.stringify(updated));
             };
 
-            const endSession = (rating, notes = '') => {
+            const endSession = (rating) => {
                 const completed = {
                     ...activeSession,
                     endTime: Date.now(),
-                    outcome: { rating, notes }
+                    outcome: { rating }
                 };
                 
                 setSessions([completed, ...sessions]);
                 setActiveSession(null);
                 localStorage.removeItem('activeSession');
                 setElapsedTime(0);
-                setView('history');
+            };
+
+            const renameSession = (sessionId, newName) => {
+                if (!newName.trim()) return;
+                
+                const updated = sessions.map(s => 
+                    s.id === sessionId 
+                        ? { ...s, commitment: newName.trim() }
+                        : s
+                );
+                setSessions(updated);
             };
 
             const formatTime = (seconds) => {
@@ -1379,7 +1362,7 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                 const secs = seconds % 60;
                 
                 if (hrs > 0) {
-                    return `${hrs}h ${mins}m ${secs}s`;
+                    return `${hrs}h ${mins}m`;
                 } else if (mins > 0) {
                     return `${mins}m ${secs}s`;
                 }
@@ -1413,218 +1396,251 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                 .map(([commitment]) => commitment);
 
             return (
-                <div className="focus-container">
-                    <div className="focus-tabs">
-                        <button
-                            onClick={() => setView('active')}
-                            className={`focus-tab ${view === 'active' ? 'active' : ''}`}
-                        >
-                            {activeSession ? 'Active session' : 'Start session'}
-                        </button>
-                        <button
-                            onClick={() => setView('history')}
-                            className={`focus-tab ${view === 'history' ? 'active' : ''}`}
-                        >
-                            History {sessions.length > 0 && `(${sessions.length})`}
-                        </button>
+                <div style={{ 
+                    marginTop: '1rem', 
+                    paddingTop: '1rem', 
+                    borderTop: '1px solid #222' 
+                }}>
+                    <div style={{ 
+                        fontSize: '0.75rem', 
+                        color: '#888', 
+                        marginBottom: '0.75rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <span>FOCUS TRACKER</span>
+                        {sessions.length > 0 && (
+                            <button
+                                onClick={() => setShowHistory(!showHistory)}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#888',
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                    padding: '0'
+                                }}
+                            >
+                                {showHistory ? 'Hide' : `History (${sessions.length})`}
+                            </button>
+                        )}
                     </div>
 
-                    {view === 'active' && !activeSession && (
+                    {!activeSession && !showHistory && (
                         <div>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
-                                    What are you working on right now?
-                                </label>
-                                <input
-                                    type="text"
-                                    className="focus-input"
-                                    value={commitment}
-                                    onChange={(e) => setCommitment(e.target.value)}
-                                    placeholder="e.g., Building payment flow for app"
-                                    onKeyPress={(e) => e.key === 'Enter' && startSession()}
-                                />
-                            </div>
-
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
-                                    How long? (optional)
-                                </label>
-                                <div className="duration-buttons">
-                                    {[
-                                        { label: 'Quick task', mins: 30 },
-                                        { label: 'Deep work', mins: 90 },
-                                        { label: 'Until done', mins: null }
-                                    ].map(opt => (
-                                        <button
-                                            key={opt.label}
-                                            className={`duration-btn ${duration === opt.mins ? 'selected' : ''}`}
-                                            onClick={() => setDuration(opt.mins)}
-                                        >
-                                            <div>{opt.label}</div>
-                                            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
-                                                {opt.mins ? `${opt.mins}m` : '∞'}
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <button 
-                                className="start-btn" 
+                            <input
+                                type="text"
+                                placeholder="What are you working on?"
+                                value={commitment}
+                                onChange={(e) => setCommitment(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && startSession()}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.5rem',
+                                    background: '#0a0a0a',
+                                    border: '1px solid #333',
+                                    borderRadius: '4px',
+                                    color: '#e0e0e0',
+                                    fontSize: '0.85rem',
+                                    marginBottom: '0.5rem'
+                                }}
+                            />
+                            <button
                                 onClick={startSession}
                                 disabled={!commitment.trim()}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.5rem',
+                                    background: commitment.trim() ? '#2a6b6b' : '#1a3a3a',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    fontSize: '0.85rem',
+                                    cursor: commitment.trim() ? 'pointer' : 'not-allowed'
+                                }}
                             >
-                                Start Session
+                                Start Focus Session
                             </button>
                         </div>
                     )}
 
-                    {view === 'active' && activeSession && (
+                    {activeSession && !showHistory && (
                         <div>
-                            <div className="active-session-box">
-                                <div className="commitment-label">Your commitment</div>
-                                <div className="commitment-text">{activeSession.commitment}</div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div className="timer-display">{formatTime(elapsedTime)}</div>
-                                    {activeSession.duration && (
-                                        <div style={{ fontSize: '13px', color: '#60a5fa' }}>
-                                            Target: {activeSession.duration}m
-                                        </div>
-                                    )}
+                            <div style={{
+                                background: '#1a1a1a',
+                                border: '1px solid #2a6b6b',
+                                borderRadius: '6px',
+                                padding: '0.75rem',
+                                marginBottom: '0.75rem'
+                            }}>
+                                <div style={{ 
+                                    fontSize: '0.85rem', 
+                                    color: '#60a5fa', 
+                                    marginBottom: '0.5rem',
+                                    fontWeight: 500
+                                }}>
+                                    {activeSession.commitment}
+                                </div>
+                                <div style={{ 
+                                    fontSize: '1.25rem', 
+                                    fontWeight: 600, 
+                                    color: '#60a5fa' 
+                                }}>
+                                    {formatTime(elapsedTime)}
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
-                                    Quick check-in
-                                </label>
-                                <div className="checkin-buttons">
-                                    <button
-                                        onClick={() => addCheckIn('focused')}
-                                        className="checkin-btn focused"
-                                    >
-                                        ✓ Still focused
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            const note = prompt('What pulled you away?');
-                                            if (note !== null) addCheckIn('distracted', note);
-                                        }}
-                                        className="checkin-btn distracted"
-                                    >
-                                        ⚠ Got distracted
-                                    </button>
-                                </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                <button
+                                    onClick={() => addCheckIn('focused')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '0.5rem',
+                                        background: 'transparent',
+                                        border: '1px solid #22c55e',
+                                        color: '#4ade80',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ✓ Focused
+                                </button>
+                                <button
+                                    onClick={() => addCheckIn('distracted')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '0.5rem',
+                                        background: 'transparent',
+                                        border: '1px solid #eab308',
+                                        color: '#facc15',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ⚠ Distracted
+                                </button>
                             </div>
 
                             {activeSession.checkIns.length > 0 && (
-                                <div style={{ marginBottom: '1.5rem', fontSize: '13px' }}>
-                                    <div style={{ color: '#888', marginBottom: '8px' }}>
-                                        Check-ins: {activeSession.checkIns.length}
-                                    </div>
-                                    {activeSession.checkIns.slice(-3).map((checkIn, i) => (
-                                        <div key={i} style={{ padding: '6px 0', borderTop: '1px solid #222' }}>
-                                            <span style={{ 
-                                                color: checkIn.status === 'focused' ? '#4ade80' : '#facc15',
-                                                marginRight: '8px'
-                                            }}>
-                                                {checkIn.status === 'focused' ? '✓ Focused' : '⚠ Distracted'}
-                                            </span>
-                                            {checkIn.note && <span style={{ color: '#888' }}>— {checkIn.note}</span>}
-                                        </div>
-                                    ))}
+                                <div style={{ 
+                                    fontSize: '0.7rem', 
+                                    color: '#888', 
+                                    marginBottom: '0.75rem',
+                                    padding: '0.5rem',
+                                    background: '#0a0a0a',
+                                    borderRadius: '4px'
+                                }}>
+                                    {activeSession.checkIns.filter(c => c.status === 'focused').length} focused, {' '}
+                                    {activeSession.checkIns.filter(c => c.status === 'distracted').length} distracted
                                 </div>
                             )}
 
-                            <div style={{ marginTop: '2rem' }}>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
-                                    How did it go?
-                                </label>
-                                <div className="rating-buttons">
-                                    {[1, 2, 3, 4, 5].map(rating => (
-                                        <button
-                                            key={rating}
-                                            onClick={() => {
-                                                const notes = prompt('Any notes? (optional)');
-                                                endSession(rating, notes || '');
-                                            }}
-                                            className="rating-btn"
-                                        >
-                                            <div style={{ fontSize: '18px', marginBottom: '4px' }}>
-                                                {rating === 1 ? '😞' : rating === 2 ? '😕' : rating === 3 ? '😐' : rating === 4 ? '🙂' : '😊'}
-                                            </div>
-                                            <div style={{ fontSize: '11px', color: '#888' }}>{rating}</div>
-                                        </button>
-                                    ))}
-                                </div>
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>
+                                How did it go?
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                {[1, 2, 3, 4, 5].map(rating => (
+                                    <button
+                                        key={rating}
+                                        onClick={() => endSession(rating)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '0.5rem 0.25rem',
+                                            background: 'transparent',
+                                            border: '1px solid #333',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '1rem'
+                                        }}
+                                    >
+                                        {rating === 1 ? '😞' : rating === 2 ? '😕' : rating === 3 ? '😐' : rating === 4 ? '🙂' : '😊'}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     )}
 
-                    {view === 'history' && (
+                    {showHistory && (
                         <div>
                             {avoidancePatterns.length > 0 && (
-                                <div className="avoidance-warning">
-                                    <div className="warning-title">⚠ Avoidance pattern detected</div>
-                                    <div className="warning-text">
-                                        You've started "{avoidancePatterns[0]}" {patterns[avoidancePatterns[0]].count} times but never finished with a high rating.
-                                    </div>
+                                <div style={{
+                                    background: '#2a2010',
+                                    border: '1px solid #eab308',
+                                    borderRadius: '4px',
+                                    padding: '0.5rem',
+                                    marginBottom: '0.75rem',
+                                    fontSize: '0.75rem',
+                                    color: '#facc15'
+                                }}>
+                                    ⚠ Pattern: "{avoidancePatterns[0]}" started {patterns[avoidancePatterns[0]].count}x, never finished
                                 </div>
                             )}
 
-                            {sessions.length === 0 ? (
-                                <div className="empty-state">
-                                    <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⏱️</div>
-                                    <p>No sessions yet. Start your first commitment!</p>
-                                </div>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                    {sessions.map(session => {
-                                        const sessionDuration = session.endTime - session.startTime;
-                                        const focusedCheckins = session.checkIns.filter(c => c.status === 'focused').length;
-                                        const distractedCheckins = session.checkIns.filter(c => c.status === 'distracted').length;
-                                        
-                                        return (
-                                            <div key={session.id} className="session-card">
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '4px' }}>
-                                                            {session.commitment}
-                                                        </div>
-                                                        <div style={{ fontSize: '13px', color: '#888' }}>
-                                                            {new Date(session.startTime).toLocaleDateString('en-US', { 
-                                                                month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
-                                                            })}
-                                                            {' · '}
-                                                            {formatDuration(sessionDuration)}
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ fontSize: '20px' }}>
-                                                        {session.outcome?.rating === 1 ? '😞' : 
-                                                         session.outcome?.rating === 2 ? '😕' : 
-                                                         session.outcome?.rating === 3 ? '😐' : 
-                                                         session.outcome?.rating === 4 ? '🙂' : 
-                                                         session.outcome?.rating === 5 ? '😊' : '—'}
-                                                    </div>
+                            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                {sessions.map(session => {
+                                    const duration = session.endTime - session.startTime;
+                                    const focusedCount = session.checkIns.filter(c => c.status === 'focused').length;
+                                    const distractedCount = session.checkIns.filter(c => c.status === 'distracted').length;
+                                    
+                                    return (
+                                        <div
+                                            key={session.id}
+                                            style={{
+                                                background: '#1a1a1a',
+                                                border: '1px solid #222',
+                                                borderRadius: '4px',
+                                                padding: '0.5rem',
+                                                marginBottom: '0.5rem',
+                                                fontSize: '0.75rem'
+                                            }}
+                                        >
+                                            <div style={{ 
+                                                fontWeight: 500, 
+                                                marginBottom: '0.25rem',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'start'
+                                            }}>
+                                                <div 
+                                                    style={{ 
+                                                        flex: 1, 
+                                                        paddingRight: '0.5rem',
+                                                        cursor: 'pointer',
+                                                        borderBottom: '1px dashed #333'
+                                                    }}
+                                                    onClick={() => {
+                                                        const newName = prompt('Rename session:', session.commitment);
+                                                        if (newName) renameSession(session.id, newName);
+                                                    }}
+                                                    title="Click to rename"
+                                                >
+                                                    {session.commitment}
                                                 </div>
-                                                
-                                                {(focusedCheckins > 0 || distractedCheckins > 0) && (
-                                                    <div style={{ fontSize: '12px', color: '#888', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #222' }}>
-                                                        {focusedCheckins > 0 && <span style={{ marginRight: '12px' }}>✓ {focusedCheckins} focused</span>}
-                                                        {distractedCheckins > 0 && <span>⚠ {distractedCheckins} distracted</span>}
-                                                    </div>
-                                                )}
-                                                
-                                                {session.outcome?.notes && (
-                                                    <div style={{ fontSize: '13px', color: '#888', marginTop: '8px', fontStyle: 'italic' }}>
-                                                        "{session.outcome.notes}"
-                                                    </div>
+                                                <div style={{ fontSize: '1rem' }}>
+                                                    {session.outcome?.rating === 1 ? '😞' : 
+                                                     session.outcome?.rating === 2 ? '😕' : 
+                                                     session.outcome?.rating === 3 ? '😐' : 
+                                                     session.outcome?.rating === 4 ? '🙂' : 
+                                                     session.outcome?.rating === 5 ? '😊' : '—'}
+                                                </div>
+                                            </div>
+                                            <div style={{ color: '#888', fontSize: '0.7rem' }}>
+                                                {new Date(session.startTime).toLocaleDateString('en-US', { 
+                                                    month: 'short', day: 'numeric'
+                                                })} · {formatDuration(duration)}
+                                                {(focusedCount > 0 || distractedCount > 0) && (
+                                                    <span style={{ marginLeft: '0.5rem' }}>
+                                                        · ✓{focusedCount} ⚠{distractedCount}
+                                                    </span>
                                                 )}
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </div>
