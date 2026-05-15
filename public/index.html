@@ -469,6 +469,261 @@
             font-size: 0.85rem;
             font-family: 'Courier New', monospace;
         }
+
+        /* Tab Navigation */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            background: #0a0a0a;
+            border-bottom: 1px solid #222;
+            height: 60px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 0;
+            color: #888;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: #c87941;
+        }
+
+        .nav-tab.active {
+            color: #e0e0e0;
+            border-bottom-color: #c87941;
+        }
+
+        .nav-settings {
+            font-size: 0.85rem;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .nav-settings:hover {
+            color: #c87941;
+        }
+
+        /* Focus Tracker Styles */
+        .focus-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .focus-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #222;
+        }
+
+        .focus-tab {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .focus-tab:hover {
+            color: #e0e0e0;
+        }
+
+        .focus-tab.active {
+            color: #e0e0e0;
+            border-bottom-color: #e0e0e0;
+        }
+
+        .focus-input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .focus-input:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .duration-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .duration-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .duration-btn:hover {
+            border-color: #c87941;
+            background: #1a1a1a;
+        }
+
+        .duration-btn.selected {
+            border-color: #c87941;
+            background: #2a1a10;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #c87941;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .start-btn:hover {
+            background: #d68952;
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .active-session-box {
+            background: #1a1a1a;
+            border: 1px solid #2a6b6b;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .commitment-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .commitment-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #60a5fa;
+            margin-bottom: 0.75rem;
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #60a5fa;
+        }
+
+        .checkin-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .checkin-btn {
+            flex: 1;
+            padding: 0.625rem;
+            font-size: 0.85rem;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .checkin-btn.focused {
+            border: 1px solid #22c55e;
+            color: #4ade80;
+        }
+
+        .checkin-btn.distracted {
+            border: 1px solid #eab308;
+            color: #facc15;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+            background: transparent;
+            border: 1px solid #333;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .rating-btn:hover {
+            border-color: #c87941;
+            background: #1a1a1a;
+        }
+
+        .session-card {
+            background: #1a1a1a;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .avoidance-warning {
+            background: #2a2010;
+            border: 1px solid #eab308;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #facc15;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning-text {
+            font-size: 0.85rem;
+            color: #facc15;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -511,6 +766,7 @@ Bad questions (NEVER use these):
 TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Never "interesting" as filler.`;
 
         function ArtemisApp() {
+            const [activeTab, setActiveTab] = useState('artemis');
             const [apiKey, setApiKey] = useState(localStorage.getItem('artemis_api_key') || '');
             const [showApiKeyModal, setShowApiKeyModal] = useState(!localStorage.getItem('artemis_api_key'));
             const [sessions, setSessions] = useState([]);
@@ -874,6 +1130,27 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                         </div>
                     )}
 
+                    <div className="top-nav">
+                        <div className="nav-tabs">
+                            <button 
+                                className={`nav-tab ${activeTab === 'artemis' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('artemis')}
+                            >
+                                Artemis
+                            </button>
+                            <button 
+                                className={`nav-tab ${activeTab === 'focus' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('focus')}
+                            >
+                                Focus
+                            </button>
+                        </div>
+                        <div className="nav-settings" onClick={() => setShowApiKeyModal(true)}>
+                            API Settings
+                        </div>
+                    </div>
+
+                    {activeTab === 'artemis' && (
                     <div className="app-container">
                         <div className="sidebar">
                             <div className="sidebar-header">
@@ -1005,7 +1282,352 @@ TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Neve
                             )}
                         </div>
                     </div>
+                    )}
+
+                    {activeTab === 'focus' && <FocusTracker />}
                 </>
+            );
+        }
+
+        function FocusTracker() {
+            const [sessions, setSessions] = useState([]);
+            const [activeSession, setActiveSession] = useState(null);
+            const [commitment, setCommitment] = useState('');
+            const [duration, setDuration] = useState(null);
+            const [elapsedTime, setElapsedTime] = useState(0);
+            const [view, setView] = useState('active');
+
+            // Load sessions from localStorage on mount
+            useEffect(() => {
+                const saved = localStorage.getItem('focusSessions');
+                if (saved) {
+                    setSessions(JSON.parse(saved));
+                }
+                const active = localStorage.getItem('activeSession');
+                if (active) {
+                    setActiveSession(JSON.parse(active));
+                }
+            }, []);
+
+            // Save sessions to localStorage
+            useEffect(() => {
+                if (sessions.length > 0) {
+                    localStorage.setItem('focusSessions', JSON.stringify(sessions));
+                }
+            }, [sessions]);
+
+            // Timer for active session
+            useEffect(() => {
+                if (!activeSession) return;
+                
+                const interval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - activeSession.startTime) / 1000);
+                    setElapsedTime(elapsed);
+                }, 1000);
+
+                return () => clearInterval(interval);
+            }, [activeSession]);
+
+            const startSession = () => {
+                if (!commitment.trim()) return;
+                
+                const session = {
+                    id: Date.now(),
+                    commitment: commitment.trim(),
+                    duration,
+                    startTime: Date.now(),
+                    checkIns: [],
+                    outcome: null
+                };
+                
+                setActiveSession(session);
+                localStorage.setItem('activeSession', JSON.stringify(session));
+                setCommitment('');
+                setDuration(null);
+                setView('active');
+            };
+
+            const addCheckIn = (status, note = '') => {
+                const updated = {
+                    ...activeSession,
+                    checkIns: [
+                        ...activeSession.checkIns,
+                        { time: Date.now(), status, note }
+                    ]
+                };
+                setActiveSession(updated);
+                localStorage.setItem('activeSession', JSON.stringify(updated));
+            };
+
+            const endSession = (rating, notes = '') => {
+                const completed = {
+                    ...activeSession,
+                    endTime: Date.now(),
+                    outcome: { rating, notes }
+                };
+                
+                setSessions([completed, ...sessions]);
+                setActiveSession(null);
+                localStorage.removeItem('activeSession');
+                setElapsedTime(0);
+                setView('history');
+            };
+
+            const formatTime = (seconds) => {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                
+                if (hrs > 0) {
+                    return `${hrs}h ${mins}m ${secs}s`;
+                } else if (mins > 0) {
+                    return `${mins}m ${secs}s`;
+                }
+                return `${secs}s`;
+            };
+
+            const formatDuration = (ms) => {
+                const mins = Math.floor(ms / 60000);
+                if (mins < 60) return `${mins}m`;
+                const hrs = Math.floor(mins / 60);
+                const remainMins = mins % 60;
+                return `${hrs}h ${remainMins}m`;
+            };
+
+            const getPatterns = () => {
+                const commitmentMap = {};
+                sessions.forEach(s => {
+                    const key = s.commitment.toLowerCase();
+                    if (!commitmentMap[key]) {
+                        commitmentMap[key] = { count: 0, completed: 0 };
+                    }
+                    commitmentMap[key].count++;
+                    if (s.outcome?.rating >= 4) commitmentMap[key].completed++;
+                });
+                return commitmentMap;
+            };
+
+            const patterns = getPatterns();
+            const avoidancePatterns = Object.entries(patterns)
+                .filter(([_, data]) => data.count >= 3 && data.completed === 0)
+                .map(([commitment]) => commitment);
+
+            return (
+                <div className="focus-container">
+                    <div className="focus-tabs">
+                        <button
+                            onClick={() => setView('active')}
+                            className={`focus-tab ${view === 'active' ? 'active' : ''}`}
+                        >
+                            {activeSession ? 'Active session' : 'Start session'}
+                        </button>
+                        <button
+                            onClick={() => setView('history')}
+                            className={`focus-tab ${view === 'history' ? 'active' : ''}`}
+                        >
+                            History {sessions.length > 0 && `(${sessions.length})`}
+                        </button>
+                    </div>
+
+                    {view === 'active' && !activeSession && (
+                        <div>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
+                                    What are you working on right now?
+                                </label>
+                                <input
+                                    type="text"
+                                    className="focus-input"
+                                    value={commitment}
+                                    onChange={(e) => setCommitment(e.target.value)}
+                                    placeholder="e.g., Building payment flow for app"
+                                    onKeyPress={(e) => e.key === 'Enter' && startSession()}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
+                                    How long? (optional)
+                                </label>
+                                <div className="duration-buttons">
+                                    {[
+                                        { label: 'Quick task', mins: 30 },
+                                        { label: 'Deep work', mins: 90 },
+                                        { label: 'Until done', mins: null }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.label}
+                                            className={`duration-btn ${duration === opt.mins ? 'selected' : ''}`}
+                                            onClick={() => setDuration(opt.mins)}
+                                        >
+                                            <div>{opt.label}</div>
+                                            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+                                                {opt.mins ? `${opt.mins}m` : '∞'}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button 
+                                className="start-btn" 
+                                onClick={startSession}
+                                disabled={!commitment.trim()}
+                            >
+                                Start Session
+                            </button>
+                        </div>
+                    )}
+
+                    {view === 'active' && activeSession && (
+                        <div>
+                            <div className="active-session-box">
+                                <div className="commitment-label">Your commitment</div>
+                                <div className="commitment-text">{activeSession.commitment}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div className="timer-display">{formatTime(elapsedTime)}</div>
+                                    {activeSession.duration && (
+                                        <div style={{ fontSize: '13px', color: '#60a5fa' }}>
+                                            Target: {activeSession.duration}m
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
+                                    Quick check-in
+                                </label>
+                                <div className="checkin-buttons">
+                                    <button
+                                        onClick={() => addCheckIn('focused')}
+                                        className="checkin-btn focused"
+                                    >
+                                        ✓ Still focused
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const note = prompt('What pulled you away?');
+                                            if (note !== null) addCheckIn('distracted', note);
+                                        }}
+                                        className="checkin-btn distracted"
+                                    >
+                                        ⚠ Got distracted
+                                    </button>
+                                </div>
+                            </div>
+
+                            {activeSession.checkIns.length > 0 && (
+                                <div style={{ marginBottom: '1.5rem', fontSize: '13px' }}>
+                                    <div style={{ color: '#888', marginBottom: '8px' }}>
+                                        Check-ins: {activeSession.checkIns.length}
+                                    </div>
+                                    {activeSession.checkIns.slice(-3).map((checkIn, i) => (
+                                        <div key={i} style={{ padding: '6px 0', borderTop: '1px solid #222' }}>
+                                            <span style={{ 
+                                                color: checkIn.status === 'focused' ? '#4ade80' : '#facc15',
+                                                marginRight: '8px'
+                                            }}>
+                                                {checkIn.status === 'focused' ? '✓ Focused' : '⚠ Distracted'}
+                                            </span>
+                                            {checkIn.note && <span style={{ color: '#888' }}>— {checkIn.note}</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div style={{ marginTop: '2rem' }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
+                                    How did it go?
+                                </label>
+                                <div className="rating-buttons">
+                                    {[1, 2, 3, 4, 5].map(rating => (
+                                        <button
+                                            key={rating}
+                                            onClick={() => {
+                                                const notes = prompt('Any notes? (optional)');
+                                                endSession(rating, notes || '');
+                                            }}
+                                            className="rating-btn"
+                                        >
+                                            <div style={{ fontSize: '18px', marginBottom: '4px' }}>
+                                                {rating === 1 ? '😞' : rating === 2 ? '😕' : rating === 3 ? '😐' : rating === 4 ? '🙂' : '😊'}
+                                            </div>
+                                            <div style={{ fontSize: '11px', color: '#888' }}>{rating}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'history' && (
+                        <div>
+                            {avoidancePatterns.length > 0 && (
+                                <div className="avoidance-warning">
+                                    <div className="warning-title">⚠ Avoidance pattern detected</div>
+                                    <div className="warning-text">
+                                        You've started "{avoidancePatterns[0]}" {patterns[avoidancePatterns[0]].count} times but never finished with a high rating.
+                                    </div>
+                                </div>
+                            )}
+
+                            {sessions.length === 0 ? (
+                                <div className="empty-state">
+                                    <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⏱️</div>
+                                    <p>No sessions yet. Start your first commitment!</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {sessions.map(session => {
+                                        const sessionDuration = session.endTime - session.startTime;
+                                        const focusedCheckins = session.checkIns.filter(c => c.status === 'focused').length;
+                                        const distractedCheckins = session.checkIns.filter(c => c.status === 'distracted').length;
+                                        
+                                        return (
+                                            <div key={session.id} className="session-card">
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '4px' }}>
+                                                            {session.commitment}
+                                                        </div>
+                                                        <div style={{ fontSize: '13px', color: '#888' }}>
+                                                            {new Date(session.startTime).toLocaleDateString('en-US', { 
+                                                                month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+                                                            })}
+                                                            {' · '}
+                                                            {formatDuration(sessionDuration)}
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ fontSize: '20px' }}>
+                                                        {session.outcome?.rating === 1 ? '😞' : 
+                                                         session.outcome?.rating === 2 ? '😕' : 
+                                                         session.outcome?.rating === 3 ? '😐' : 
+                                                         session.outcome?.rating === 4 ? '🙂' : 
+                                                         session.outcome?.rating === 5 ? '😊' : '—'}
+                                                    </div>
+                                                </div>
+                                                
+                                                {(focusedCheckins > 0 || distractedCheckins > 0) && (
+                                                    <div style={{ fontSize: '12px', color: '#888', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #222' }}>
+                                                        {focusedCheckins > 0 && <span style={{ marginRight: '12px' }}>✓ {focusedCheckins} focused</span>}
+                                                        {distractedCheckins > 0 && <span>⚠ {distractedCheckins} distracted</span>}
+                                                    </div>
+                                                )}
+                                                
+                                                {session.outcome?.notes && (
+                                                    <div style={{ fontSize: '13px', color: '#888', marginTop: '8px', fontStyle: 'italic' }}>
+                                                        "{session.outcome.notes}"
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             );
         }
 
