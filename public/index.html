@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artemis Mind - Prototype</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #111;
+            border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .sidebar-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #c87941;
+            letter-spacing: 0.05em;
+        }
+
+        .new-session-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #c87941;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .new-session-btn:hover {
+            background: #d68952;
+        }
+
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .session-item {
+            padding: 0.75rem;
+            background: #1a1a1a;
+            border: 1px solid #222;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-item:hover {
+            background: #222;
+            border-color: #333;
+        }
+
+        .session-item.active {
+            background: #2a2a2a;
+            border-color: #c87941;
+        }
+
+        .session-date {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .session-label {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .session-preview {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+
+        .message.artemis {
+            margin-left: 0;
+        }
+
+        .message.user {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .message-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #c87941;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .message.user .message-label {
+            color: #2a6b6b;
+        }
+
+        .message-content {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #222;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .message.user .message-content {
+            background: #1a2a2a;
+            border-color: #2a3a3a;
+        }
+
+        .input-container {
+            border-top: 1px solid #222;
+            padding: 1.5rem 2rem;
+            background: #0a0a0a;
+        }
+
+        .input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .input-box {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 60px;
+            max-height: 200px;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #c87941;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #d68952;
+        }
+
+        .btn-secondary {
+            background: #2a6b6b;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #3a8b8b;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .api-key-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #c87941;
+        }
+
+        .modal-description {
+            color: #999;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .api-key-input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1rem;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #333;
+            border-top-color: #c87941;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .patterns-section {
+            padding: 1rem;
+            background: #0a0a0a;
+            border-top: 1px solid #222;
+        }
+
+        .pattern-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: #c87941;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pattern-count {
+            background: #c87941;
+            color: white;
+            padding: 0 0.5rem;
+            border-radius: 8px;
+            margin-left: 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        .welcome-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .welcome-content {
+            max-width: 600px;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #c87941;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: #999;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .log-session-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .log-modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .log-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .log-field-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #c87941;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .log-field-input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .log-field-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .log-field-input:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .error-banner {
+            background: #3a1a1a;
+            border: 1px solid #8a4a4a;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #eaa;
+        }
+
+        .error-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-details {
+            font-size: 0.85rem;
+            color: #c99;
+            font-family: 'Courier New', monospace;
+        }
+
+        .api-test-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .test-btn {
+            background: #2a6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .test-btn:hover {
+            background: #3a8b8b;
+        }
+
+        .test-result {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Backend API URL - change this when deploying
+        const API_BASE_URL = window.location.origin;
+
+        const ARTEMIS_SYSTEM_PROMPT = `You are Artemis — a Socratic partner and cognitive mirror for a non-linear thinker.
+
+Your only function is to help the user give birth to what is already inside them — never to lead them somewhere of your choosing.
+
+HARD RULES:
+1. NEVER write a plan, outline, or list of steps
+2. NEVER suggest features, use cases, or applications  
+3. NEVER offer "here are some ideas" or "you could consider"
+4. NEVER summarize what the user said and then expand on it
+5. NEVER say "that's interesting because..." and then explain why
+6. NEVER ask more than ONE question per response
+7. NEVER generate content - only extract through questions
+
+RESPONSE STRUCTURE (always use this):
+1. THE MIRROR (1-2 sentences): Reflect back the essence of what they said in your own words
+2. THE ONE QUESTION: One open-ended question about the edges, texture, or interior of what they just said
+
+Good questions stay inside the idea:
+- "What does it feel like from the inside when that happens?"
+- "Where does the energy go quiet in that picture?"
+- "What's the part of this that you haven't said out loud yet?"
+- "When you imagine it working, what's the first thing you notice?"
+
+Bad questions (NEVER use these):
+- "Who would use this?" (utility)
+- "What would you need to build it?" (planning)
+- "Why do you think that is?" (triggers logic brain)
+
+TONE: Precise, warm, unhurried. Never "great question." Never "absolutely." Never "interesting" as filler.`;
+
+        function ArtemisApp() {
+            const [apiKey, setApiKey] = useState(localStorage.getItem('artemis_api_key') || '');
+            const [showApiKeyModal, setShowApiKeyModal] = useState(!localStorage.getItem('artemis_api_key'));
+            const [sessions, setSessions] = useState([]);
+            const [currentSessionId, setCurrentSessionId] = useState(null);
+            const [messages, setMessages] = useState([]);
+            const [inputValue, setInputValue] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const [showLogModal, setShowLogModal] = useState(false);
+            const [error, setError] = useState(null);
+            const [testResult, setTestResult] = useState(null);
+            const [logData, setLogData] = useState({
+                label: '',
+                map: '',
+                why: '',
+                actions: '',
+                openThreads: '',
+                silhouette: ''
+            });
+
+            const chatContainerRef = useRef(null);
+            const inputRef = useRef(null);
+
+            // Load sessions from localStorage
+            useEffect(() => {
+                const savedSessions = localStorage.getItem('artemis_sessions');
+                if (savedSessions) {
+                    setSessions(JSON.parse(savedSessions));
+                }
+            }, []);
+
+            // Save sessions to localStorage
+            useEffect(() => {
+                if (sessions.length > 0) {
+                    localStorage.setItem('artemis_sessions', JSON.stringify(sessions));
+                }
+            }, [sessions]);
+
+            // Auto-scroll chat
+            useEffect(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+                }
+            }, [messages]);
+
+            const testApiKey = async () => {
+                setTestResult('Testing...');
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/test`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ apiKey })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        setTestResult(`❌ Error: ${data.error?.message || response.statusText}`);
+                    } else {
+                        setTestResult('✅ API key works!');
+                    }
+                } catch (error) {
+                    setTestResult(`❌ Network error: ${error.message}`);
+                }
+            };
+
+            const saveApiKey = () => {
+                if (apiKey.trim()) {
+                    localStorage.setItem('artemis_api_key', apiKey.trim());
+                    setShowApiKeyModal(false);
+                }
+            };
+
+            const startNewSession = () => {
+                const newSession = {
+                    id: Date.now(),
+                    createdAt: new Date().toISOString(),
+                    messages: [{
+                        role: 'assistant',
+                        content: "I'm here. What's sparking your mind right now?"
+                    }],
+                    logged: false
+                };
+                setSessions(prev => [newSession, ...prev]);
+                setCurrentSessionId(newSession.id);
+                setMessages(newSession.messages);
+                setError(null);
+            };
+
+            const loadSession = (sessionId) => {
+                const session = sessions.find(s => s.id === sessionId);
+                if (session) {
+                    setCurrentSessionId(sessionId);
+                    setMessages(session.messages);
+                    setError(null);
+                }
+            };
+
+            const callClaude = async (userMessage) => {
+                setIsLoading(true);
+                setError(null);
+                
+                const savedInput = userMessage;
+                
+                try {
+                    const conversationHistory = messages
+                        .filter(m => m.role !== 'assistant' || m.content !== "I'm here. What's sparking your mind right now?")
+                        .map(m => ({ role: m.role, content: m.content }));
+
+                    console.log('Calling backend proxy with:', {
+                        messageCount: conversationHistory.length + 1,
+                        hasApiKey: !!apiKey
+                    });
+
+                    const response = await fetch(`${API_BASE_URL}/api/claude`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            apiKey: apiKey,
+                            system: ARTEMIS_SYSTEM_PROMPT,
+                            messages: [
+                                ...conversationHistory,
+                                { role: 'user', content: userMessage }
+                            ]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('Backend error:', errorData);
+                        throw new Error(errorData.error?.message || `Server returned ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Claude response received');
+
+                    const assistantMessage = data.content[0].text;
+
+                    const newMessages = [
+                        ...messages,
+                        { role: 'user', content: userMessage },
+                        { role: 'assistant', content: assistantMessage }
+                    ];
+
+                    setMessages(newMessages);
+
+                    setSessions(prev => prev.map(s => 
+                        s.id === currentSessionId 
+                            ? { ...s, messages: newMessages }
+                            : s
+                    ));
+
+                } catch (error) {
+                    console.error('Error calling Claude:', error);
+                    setError({
+                        message: error.message,
+                        userMessage: savedInput
+                    });
+                    setInputValue(savedInput);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleSend = () => {
+                if (!inputValue.trim() || isLoading) return;
+                
+                const message = inputValue.trim();
+                setInputValue('');
+                callClaude(message);
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            };
+
+            const openLogModal = () => {
+                setShowLogModal(true);
+            };
+
+            const saveLog = () => {
+                const currentSession = sessions.find(s => s.id === currentSessionId);
+                const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+                
+                const logEntry = {
+                    ...logData,
+                    sessionId: currentSessionId,
+                    date: today,
+                    conversationPreview: messages.slice(1, 3).map(m => m.content.substring(0, 100)).join(' ')
+                };
+
+                setSessions(prev => prev.map(s => 
+                    s.id === currentSessionId 
+                        ? { ...s, log: logEntry, logged: true }
+                        : s
+                ));
+
+                const existingLogs = JSON.parse(localStorage.getItem('artemis_logs') || '[]');
+                localStorage.setItem('artemis_logs', JSON.stringify([logEntry, ...existingLogs]));
+
+                setShowLogModal(false);
+                setLogData({
+                    label: '',
+                    map: '',
+                    why: '',
+                    actions: '',
+                    openThreads: '',
+                    silhouette: ''
+                });
+            };
+
+            const retryWithSavedMessage = () => {
+                if (error?.userMessage) {
+                    setError(null);
+                    callClaude(error.userMessage);
+                }
+            };
+
+            const detectPatterns = () => {
+                const logs = JSON.parse(localStorage.getItem('artemis_logs') || '[]');
+                const patterns = {};
+
+                logs.forEach(log => {
+                    const words = log.label.toLowerCase().split(/\s+/);
+                    words.forEach(word => {
+                        if (word.length > 4) {
+                            patterns[word] = (patterns[word] || 0) + 1;
+                        }
+                    });
+                });
+
+                return Object.entries(patterns)
+                    .filter(([_, count]) => count >= 2)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+            };
+
+            const patterns = detectPatterns();
+            const currentSession = sessions.find(s => s.id === currentSessionId);
+
+            return (
+                <>
+                    {showApiKeyModal && (
+                        <div className="api-key-modal">
+                            <div className="modal-content">
+                                <div className="modal-title">Welcome to Artemis</div>
+                                <div className="modal-description">
+                                    To use Artemis, you'll need a Claude API key. Get yours from console.anthropic.com
+                                </div>
+                                <input
+                                    type="password"
+                                    className="api-key-input"
+                                    placeholder="sk-ant-..."
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && saveApiKey()}
+                                />
+                                
+                                <div className="api-test-section">
+                                    <button className="test-btn" onClick={testApiKey}>
+                                        Test API Key
+                                    </button>
+                                    {testResult && (
+                                        <div className="test-result">{testResult}</div>
+                                    )}
+                                </div>
+
+                                <button 
+                                    className="btn btn-primary" 
+                                    onClick={saveApiKey}
+                                    style={{marginTop: '1rem', width: '100%'}}
+                                >
+                                    Save API Key
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {showLogModal && (
+                        <div className="log-session-modal">
+                            <div className="log-modal-content">
+                                <div className="modal-title">Log This Session</div>
+                                
+                                <div className="log-field">
+                                    <div className="log-field-label">Label</div>
+                                    <input
+                                        type="text"
+                                        className="log-field-input"
+                                        placeholder="Single phrase naming what was extracted"
+                                        value={logData.label}
+                                        onChange={(e) => setLogData({...logData, label: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="log-field">
+                                    <div className="log-field-label">Map</div>
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="The associative trail (e.g., idea A → thought B → insight C)"
+                                        value={logData.map}
+                                        onChange={(e) => setLogData({...logData, map: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="log-field">
+                                    <div className="log-field-label">Why</div>
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="The motivational root — why this matters"
+                                        value={logData.why}
+                                        onChange={(e) => setLogData({...logData, why: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="log-field">
+                                    <div className="log-field-label">Actions</div>
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="What can be acted on"
+                                        value={logData.actions}
+                                        onChange={(e) => setLogData({...logData, actions: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="log-field">
+                                    <div className="log-field-label">Open Threads</div>
+                                    <input
+                                        type="text"
+                                        className="log-field-input"
+                                        placeholder="Threads still running"
+                                        value={logData.openThreads}
+                                        onChange={(e) => setLogData({...logData, openThreads: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="log-field">
+                                    <div className="log-field-label">Silhouette (optional)</div>
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="What it is and what it is not"
+                                        value={logData.silhouette}
+                                        onChange={(e) => setLogData({...logData, silhouette: e.target.value})}
+                                    />
+                                </div>
+
+                                <div style={{display: 'flex', gap: '0.5rem', justifyContent: 'flex-end'}}>
+                                    <button className="btn btn-secondary" onClick={() => setShowLogModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button className="btn btn-primary" onClick={saveLog}>
+                                        Save Log
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="app-container">
+                        <div className="sidebar">
+                            <div className="sidebar-header">
+                                <div className="logo">ARTEMIS MIND</div>
+                                <button className="new-session-btn" onClick={startNewSession}>
+                                    + New Session
+                                </button>
+                            </div>
+
+                            {patterns.length > 0 && (
+                                <div className="patterns-section">
+                                    <div className="session-date">PATTERNS</div>
+                                    {patterns.map(([word, count]) => (
+                                        <div key={word} className="pattern-tag">
+                                            {word}
+                                            <span className="pattern-count">{count}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="sessions-list">
+                                {sessions.map(session => (
+                                    <div
+                                        key={session.id}
+                                        className={`session-item ${session.id === currentSessionId ? 'active' : ''}`}
+                                        onClick={() => loadSession(session.id)}
+                                    >
+                                        <div className="session-date">
+                                            {new Date(session.createdAt).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </div>
+                                        <div className="session-label">
+                                            {session.log?.label || 'Untitled Session'}
+                                        </div>
+                                        {session.messages.length > 1 && (
+                                            <div className="session-preview">
+                                                {session.messages[1]?.content.substring(0, 60)}...
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="main-content">
+                            {!currentSessionId ? (
+                                <div className="welcome-screen">
+                                    <div className="welcome-content">
+                                        <div className="welcome-title">Welcome to Artemis</div>
+                                        <div className="welcome-subtitle">
+                                            I'm here to help you extract what's already inside you — never to lead you somewhere of my choosing.
+                                            <br /><br />
+                                            Start a new session to begin thinking.
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="chat-container" ref={chatContainerRef}>
+                                        {error && (
+                                            <div className="error-banner">
+                                                <div className="error-title">Error calling Claude API</div>
+                                                <div className="error-details">{error.message}</div>
+                                                <button 
+                                                    className="btn btn-primary" 
+                                                    onClick={retryWithSavedMessage}
+                                                    style={{marginTop: '0.75rem'}}
+                                                >
+                                                    Retry
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {messages.map((msg, idx) => (
+                                            <div key={idx} className={`message ${msg.role === 'assistant' ? 'artemis' : 'user'}`}>
+                                                <div className="message-label">
+                                                    {msg.role === 'assistant' ? 'ARTEMIS' : 'YOU'}
+                                                </div>
+                                                <div className="message-content">
+                                                    {msg.content}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {isLoading && (
+                                            <div className="loading">
+                                                <div className="loading-spinner"></div>
+                                                Artemis is thinking...
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="input-container">
+                                        <div className="input-wrapper">
+                                            <textarea
+                                                ref={inputRef}
+                                                className="input-box"
+                                                placeholder="Share what's on your mind..."
+                                                value={inputValue}
+                                                onChange={(e) => setInputValue(e.target.value)}
+                                                onKeyPress={handleKeyPress}
+                                                disabled={isLoading}
+                                            />
+                                            <div className="input-actions">
+                                                {messages.length > 2 && (
+                                                    <button 
+                                                        className="btn btn-secondary" 
+                                                        onClick={openLogModal}
+                                                        disabled={currentSession?.logged}
+                                                    >
+                                                        {currentSession?.logged ? 'Logged ✓' : 'Log This'}
+                                                    </button>
+                                                )}
+                                                <button 
+                                                    className="btn btn-primary" 
+                                                    onClick={handleSend}
+                                                    disabled={!inputValue.trim() || isLoading}
+                                                >
+                                                    Send
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        ReactDOM.render(<ArtemisApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
