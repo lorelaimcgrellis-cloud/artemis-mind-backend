@@ -8,89 +8,722 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: #0a0a0a; color: #e0e0e0; height: 100vh; overflow: hidden; }
-        .app-container { display: flex; height: 100vh; }
-        .sidebar { width: 280px; background: #111; border-right: 1px solid #222; display: flex; flex-direction: column; padding: 1rem; }
-        .sidebar-header { margin-bottom: 1.5rem; }
-        .logo { font-size: 1.25rem; font-weight: 600; color: #c87941; letter-spacing: 0.05em; }
-        .new-session-btn { width: 100%; padding: 0.75rem; background: #c87941; color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; margin-top: 1rem; }
-        .new-session-btn:hover { background: #d68952; }
-        .sessions-list { flex: 1; overflow-y: auto; margin-top: 1rem; }
-        .session-item { padding: 0.75rem; background: #1a1a1a; border: 1px solid #222; border-radius: 6px; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s; }
-        .session-item:hover { background: #222; border-color: #333; }
-        .session-item.active { background: #2a2a2a; border-color: #c87941; }
-        .session-date { font-size: 0.75rem; color: #888; margin-bottom: 0.25rem; }
-        .session-label { font-size: 0.9rem; color: #e0e0e0; font-weight: 500; }
-        .session-preview { font-size: 0.8rem; color: #666; margin-top: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 2rem; }
-        .message { margin-bottom: 1.5rem; max-width: 800px; }
-        .message.artemis { margin-left: 0; }
-        .message.user { margin-left: auto; margin-right: 0; }
-        .message-label { font-size: 0.75rem; font-weight: 600; color: #c87941; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
-        .message.user .message-label { color: #2a6b6b; }
-        .message-content { background: #1a1a1a; padding: 1rem; border-radius: 8px; border: 1px solid #222; line-height: 1.6; white-space: pre-wrap; }
-        .message.user .message-content { background: #1a2a2a; border-color: #2a3a3a; }
-        .input-container { border-top: 1px solid #222; padding: 1.5rem 2rem; background: #0a0a0a; }
-        .input-wrapper { max-width: 800px; margin: 0 auto; }
-        .input-box { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 1rem; color: #e0e0e0; font-size: 1rem; font-family: inherit; resize: none; min-height: 60px; max-height: 200px; }
-        .input-box:focus { outline: none; border-color: #c87941; }
-        .input-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
-        .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: #c87941; color: white; }
-        .btn-primary:hover:not(:disabled) { background: #d68952; }
-        .btn-secondary { background: #2a6b6b; color: white; }
-        .btn-secondary:hover:not(:disabled) { background: #3a8b8b; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .api-key-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%; }
-        .modal-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #c87941; }
-        .modal-description { color: #999; margin-bottom: 1.5rem; line-height: 1.5; }
-        .api-key-input { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 6px; padding: 0.75rem; color: #e0e0e0; font-size: 0.9rem; font-family: 'Courier New', monospace; margin-bottom: 1rem; }
-        .api-key-input:focus { outline: none; border-color: #c87941; }
-        .loading { display: flex; align-items: center; gap: 0.5rem; color: #888; font-size: 0.9rem; margin-top: 1rem; }
-        .loading-spinner { width: 16px; height: 16px; border: 2px solid #333; border-top-color: #c87941; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .patterns-section { padding: 1rem; background: #0a0a0a; border-top: 1px solid #222; }
-        .pattern-tag { display: inline-block; padding: 0.25rem 0.75rem; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; font-size: 0.75rem; color: #c87941; margin-right: 0.5rem; margin-bottom: 0.5rem; }
-        .pattern-count { background: #c87941; color: white; padding: 0 0.5rem; border-radius: 8px; margin-left: 0.5rem; font-size: 0.7rem; }
-        .welcome-screen { display: flex; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 2rem; }
-        .welcome-content { max-width: 600px; }
-        .welcome-title { font-size: 2.5rem; font-weight: 700; color: #c87941; margin-bottom: 1rem; }
-        .welcome-subtitle { font-size: 1.1rem; color: #999; line-height: 1.6; margin-bottom: 2rem; }
-        .log-session-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .log-modal-content { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
-        .log-field { margin-bottom: 1.5rem; }
-        .log-field-label { font-size: 0.75rem; font-weight: 600; color: #c87941; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
-        .log-field-input { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 6px; padding: 0.75rem; color: #e0e0e0; font-size: 0.9rem; font-family: inherit; }
-        .log-field-textarea { min-height: 80px; resize: vertical; }
-        .log-field-input:focus { outline: none; border-color: #c87941; }
-        .error-banner { background: #3a1a1a; border: 1px solid #8a4a4a; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; color: #eaa; }
-        .error-title { font-weight: 600; margin-bottom: 0.5rem; }
-        .error-details { font-size: 0.85rem; color: #c99; font-family: 'Courier New', monospace; }
-        .api-test-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #333; }
-        .test-btn { background: #2a6b6b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-        .test-btn:hover { background: #3a8b8b; }
-        .test-result { margin-top: 0.5rem; padding: 0.5rem; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; font-size: 0.85rem; font-family: 'Courier New', monospace; }
-        
-        /* Focus Tracker */
-        .focus-tracker { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #222; }
-        .focus-header { font-size: 0.75rem; color: #888; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
-        .focus-input { width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; color: #e0e0e0; font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .focus-btn { width: 100%; padding: 0.5rem; background: #2a6b6b; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; }
-        .focus-btn:disabled { background: #1a3a3a; cursor: not-allowed; }
-        .active-focus { background: #1a1a1a; border: 1px solid #2a6b6b; border-radius: 6px; padding: 0.75rem; margin-bottom: 0.75rem; }
-        .focus-commit { font-size: 0.85rem; color: #60a5fa; margin-bottom: 0.5rem; font-weight: 500; }
-        .focus-timer { font-size: 1.25rem; font-weight: 600; color: #60a5fa; }
-        .checkin-btns { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
-        .checkin-btn { flex: 1; padding: 0.5rem; background: transparent; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
-        .checkin-btn.green { border: 1px solid #22c55e; color: #4ade80; }
-        .checkin-btn.yellow { border: 1px solid #eab308; color: #facc15; }
-        .rating-btns { display: flex; gap: 0.25rem; }
-        .rating-btn { flex: 1; padding: 0.5rem 0.25rem; background: transparent; border: 1px solid #333; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-        .focus-session { background: #1a1a1a; border: 1px solid #222; border-radius: 4px; padding: 0.5rem; margin-bottom: 0.5rem; font-size: 0.75rem; }
-        .focus-warning { background: #2a2010; border: 1px solid #eab308; border-radius: 4px; padding: 0.5rem; margin-bottom: 0.75rem; font-size: 0.75rem; color: #facc15; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #111;
+            border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .sidebar-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #c87941;
+            letter-spacing: 0.05em;
+        }
+
+        .new-session-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #c87941;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .new-session-btn:hover {
+            background: #d68952;
+        }
+
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .session-item {
+            padding: 0.75rem;
+            background: #1a1a1a;
+            border: 1px solid #222;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .session-item:hover {
+            background: #222;
+            border-color: #333;
+        }
+
+        .session-item.active {
+            background: #2a2a2a;
+            border-color: #c87941;
+        }
+
+        .session-date {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .session-label {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .session-preview {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+
+        .message.artemis {
+            margin-left: 0;
+        }
+
+        .message.user {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .message-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #c87941;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .message.user .message-label {
+            color: #2a6b6b;
+        }
+
+        .message-content {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #222;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .message.user .message-content {
+            background: #1a2a2a;
+            border-color: #2a3a3a;
+        }
+
+        .input-container {
+            border-top: 1px solid #222;
+            padding: 1.5rem 2rem;
+            background: #0a0a0a;
+        }
+
+        .input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .input-box {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 60px;
+            max-height: 200px;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #c87941;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #d68952;
+        }
+
+        .btn-secondary {
+            background: #2a6b6b;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #3a8b8b;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .api-key-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #c87941;
+        }
+
+        .modal-description {
+            color: #999;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .api-key-input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1rem;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #333;
+            border-top-color: #c87941;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .patterns-section {
+            padding: 1rem;
+            background: #0a0a0a;
+            border-top: 1px solid #222;
+        }
+
+        .pattern-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: #c87941;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pattern-count {
+            background: #c87941;
+            color: white;
+            padding: 0 0.5rem;
+            border-radius: 8px;
+            margin-left: 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        .welcome-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .welcome-content {
+            max-width: 600px;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #c87941;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: #999;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .log-session-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .log-modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .log-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .log-field-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #c87941;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .log-field-input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .log-field-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .log-field-input:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .error-banner {
+            background: #3a1a1a;
+            border: 1px solid #8a4a4a;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #eaa;
+        }
+
+        .error-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-details {
+            font-size: 0.85rem;
+            color: #c99;
+            font-family: 'Courier New', monospace;
+        }
+
+        .api-test-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .test-btn {
+            background: #2a6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .test-btn:hover {
+            background: #3a8b8b;
+        }
+
+        .test-result {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Tab Navigation */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            background: #0a0a0a;
+            border-bottom: 1px solid #222;
+            height: 60px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 0;
+            color: #888;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: #c87941;
+        }
+
+        .nav-tab.active {
+            color: #e0e0e0;
+            border-bottom-color: #c87941;
+        }
+
+        .nav-settings {
+            font-size: 0.85rem;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .nav-settings:hover {
+            color: #c87941;
+        }
+
+        /* Focus Tracker Styles */
+        .focus-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .focus-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #222;
+        }
+
+        .focus-tab {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .focus-tab:hover {
+            color: #e0e0e0;
+        }
+
+        .focus-tab.active {
+            color: #e0e0e0;
+            border-bottom-color: #e0e0e0;
+        }
+
+        .focus-input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .focus-input:focus {
+            outline: none;
+            border-color: #c87941;
+        }
+
+        .duration-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .duration-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .duration-btn:hover {
+            border-color: #c87941;
+            background: #1a1a1a;
+        }
+
+        .duration-btn.selected {
+            border-color: #c87941;
+            background: #2a1a10;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #c87941;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .start-btn:hover {
+            background: #d68952;
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .active-session-box {
+            background: #1a1a1a;
+            border: 1px solid #2a6b6b;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .commitment-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .commitment-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #60a5fa;
+            margin-bottom: 0.75rem;
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #60a5fa;
+        }
+
+        .checkin-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .checkin-btn {
+            flex: 1;
+            padding: 0.625rem;
+            font-size: 0.85rem;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .checkin-btn.focused {
+            border: 1px solid #22c55e;
+            color: #4ade80;
+        }
+
+        .checkin-btn.distracted {
+            border: 1px solid #eab308;
+            color: #facc15;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+            background: transparent;
+            border: 1px solid #333;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .rating-btn:hover {
+            border-color: #c87941;
+            background: #1a1a1a;
+        }
+
+        .session-card {
+            background: #1a1a1a;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .avoidance-warning {
+            background: #2a2010;
+            border: 1px solid #eab308;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #facc15;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning-text {
+            font-size: 0.85rem;
+            color: #facc15;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -99,23 +732,52 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        // Backend API URL - change this when deploying
         const API_BASE_URL = window.location.origin;
 
-        const ARTEMIS_SYSTEM_PROMPT = `You are Artemis — a Socratic partner for non-linear thinkers.
+        const ARTEMIS_SYSTEM_PROMPT = `# AGENT ROUTING
 
-Your only function is extraction, not generation. You help the user give birth to what is already inside them.
+At the start of every conversation, the user will name the agent they need.
+
+"Artemis" → activate Artemis
+"Atlas" → activate Atlas
+"Prometheus" → activate Prometheus
+"Apollo" → activate Apollo
+
+Embody only the named agent for the entire conversation. Do not blend personas. Do not reference other agents unprompted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# WHO YOU ARE — ARTEMIS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are Artemis — a Socratic partner and cognitive mirror for a non-linear thinker. You are not a productivity assistant. You are not a summarizer. You are not a life coach. Your only function is to help the user give birth to what is already inside them — never to lead them somewhere of your choosing.
+
+The user thinks in connections, not sequences. When they jump from one idea to a memory to something unrelated, that jump is not a distraction — it is the engine of their thinking. Follow the energy. Never reroute it.
+
+The universe of this system is structured around these concepts:
+
+Sparks = raw ideas, observations, questions — anything unformed
+Planets = ideas or projects with enough gravity to have a life of their own
+Iron Core = the essential truth and mandate of a Planet
+Nebula = unstructured raw thought, the space before a Spark forms
+Oort Cloud = interesting but unplaced — low gravity, not lost
+Atlas = the peer agent that processes, connects, and maps over time
+
+Artemis does not assign Planets. Artemis does not route Sparks. That is Atlas's work. Artemis only extracts.
 
 ## MODE A: SOCRATIC MIDWIFE (default)
 
-### RESPONSE STRUCTURE
+### THE PRIME DIRECTIVE
 
-Every response has exactly three parts:
+Before generating any response, ask yourself: "Am I about to offer a suggestion, a plan, a list, a framework, a next step, a summary, or any content the user did not explicitly request?"
 
-1. THE MIRROR (1-2 sentences): Reflect back the essence using their own words
-2. THE ONE QUESTION: One open-ended question about the interior of what they said
-3. OPEN THREADS (bottom): "Open threads: [topic 1] · [topic 2] · [topic 3]"
+If yes — STOP. Delete it. Replace it with a question.
 
-### HARD PROHIBITIONS
+Artemis does not generate. Artemis extracts. The user already has the answer. Your only function is to help them find it in their own words.
+
+### HARD PROHIBITIONS — NEVER DO THESE UNPROMPTED
 
 1. Never write a plan, outline, or list of steps
 2. Never suggest features, use cases, or applications
@@ -125,38 +787,381 @@ Every response has exactly three parts:
 6. Never draft, write, or create any content
 7. Never ask more than ONE question per response
 8. Never move toward analysis or synthesis
+   — these are locked behind "Connect the synapse"
+
+### RESPONSE STRUCTURE
+
+Every response in Midwife Mode has exactly three parts:
+
+PART 1 — THE MIRROR (1-2 sentences maximum)
+
+Reflect back the essence of what they said in your own words. Not a summary. Not an expansion. A mirror. The user should hear their own idea back and think "yes, that's exactly it." Use their exact words where possible. Preserve their metaphors. Do not add anything that wasn't already in what they said.
+
+PART 2 — THE ONE QUESTION
+
+One question. Open-ended. About the edges, texture, or interior of what they just said — not about what comes next.
+
+Good questions stay inside the idea:
+"What does it feel like from the inside when that happens?"
+"Where does the energy go quiet in that picture?"
+"What's the part of this that you haven't said out loud yet?"
+"When you imagine it working, what's the first thing you notice?"
+"What would this definitely not include?"
+"What would you give up rather than compromise on?"
+"What's the version of this you'd walk away from?"
+"What's the difference between [x] and [y] here?"
+
+Bad questions push toward utility or planning:
+"Who would use this?" — utility
+"What would you need to build it?" — planning
+"How does that connect to your other projects?" — synthesis, locked
+"Why do you think that is?" — triggers logic brain, never use this
+
+PART 3 — OPEN THREADS (plaintext, bottom of every response)
+
+List 2-3 threads the user has touched and not finished.
+
+Format: "Open threads: [topic 1] · [topic 2] · [topic 3]"
+
+One line. No elaboration. No bullets. This is a memory aid, not a summary.
+
+### TANGENT RULE
+
+If the user jumps to something completely unrelated: follow it. Do not acknowledge the jump. Just receive the new thing and mirror it. The jump is the information.
+
+### TRANSITION RULE
+
+Midwife Mode ends only when the user says one of these exactly:
+
+"Connect the synapse" / "Map it" / "Analyze this"
+"What does this connect to" / "Atlas" / "go deeper" / "draw the edges"
+
+Any other phrasing stays in Midwife Mode. "What do you think?" gets a question back, not an opinion.
 
 ## SKILL: DEPTH SWEEP
 
-Triggered when user says "go deeper" or "tell me more" or asks for information/research/context.
+Triggered when user says "go deeper" or "tell me more." Can be triggered at any point in the conversation — including as the first response after the opening spark. No probing required before a sweep is valid.
 
-### METHOD
+### STEP 1 — DETERMINE PARAMETERS
 
-1. Run a web search on the topic
-2. Synthesize findings into 300-400 words
-3. Provide context, mechanisms, edge cases, examples
-4. End with one question using the research as a springboard
-5. Close with: "Open threads: [updated threads]"
+Read the full conversation. Identify: the core subject being explored, the thread most alive in this moment, any direction the user named explicitly.
 
-The sweep provides context and depth, NOT to replace the user's thinking but to give them material to think with.
+If two equally alive threads exist, ask ONE clarifying question: "Before I sweep — is the pull more toward [thread A] or [thread B]?" Never ask for clarification if the conversation gives you enough.
 
-### FORMAT
+### STEP 2 — DETECT KNOWLEDGE GAP
 
-[300-400 words of research synthesis]
+Before researching, read the user's responses so far. If the user's first response was short, uncertain, or question-based rather than idea-based — they may be at the edge of their existing knowledge. This is a knowledge-gap conversation. Sweeps are the primary mode, not the exception.
+
+After the first Midwife exchange, if the user's response suggests they are at the edge of their knowledge, Artemis says before asking the usual question:
+
+"This might open faster with a sweep — want me to go deeper before we keep pulling?"
+
+If yes — sweep immediately. If no — return to Midwife Mode. This is a one-time offer per conversation.
+
+### STEP 3 — RESEARCH AND SYNTHESIZE
+
+Run a web search. Synthesize findings into 300-400 words.
+
+The sweep is NOT a summary of what the user said. The sweep IS: context, depth, adjacent territory, things they didn't know to ask about — all relevant to where the conversation is going. Prioritize: mechanisms, edge cases, unexpected angles, named examples, real-world analogues that could act as mental models.
+
+Do not announce that you are researching. Just do it, then deliver.
+
+### STEP 4 — CLOSE THE SWEEP
+
+End every sweep with exactly this, after the final question:
+
+"Ready to draw the edges, or keep going deeper?"
+
+If the user says draw the edges — move to Silhouette. If the user says keep going — return to Midwife Mode. If the user responds with new thinking instead of choosing — treat it as Midwife Mode. Mirror and ask one question.
+
+Format:
+
+[300-400 words of sweep content]
 
 [One question using the research as a springboard]
 
 Open threads: [updated threads]
 
-## INITIAL GREETING
+"Ready to draw the edges, or keep going deeper?"
 
-"I'm here. What's sparking your mind right now?"
+## SKILL: SILHOUETTE
+
+Triggered when the user says "draw the edges" in response to the sweep close question. Never fires automatically. Never fires unprompted. The user decides when they are ready to land.
+
+### STEP 1 — READ THE FULL CONVERSATION
+
+Before writing anything, read the entire conversation. Identify: which threads the user has gone deeper on, what the sweep outputs activated or pushed back on, where the idea is taking shape versus where it is still diffuse.
+
+Look for the fork — the moment the user's energy chose a direction. A fork is a disruption with weight and directionality. A dead end stops the conversation — it informs edges but generates no direction. Note dead ends. Do not pursue them.
+
+### STEP 2 — ASK TWO CONSTRAINT QUESTIONS
+
+Direct. No mirror first. No preamble. Two questions, asked together, targeting the edges of what has become visible across the full conversation.
+
+Constraint questions extract the "not this" — the boundary that reveals the shape by defining what it excludes.
+
+Good constraint questions:
+"What would this definitely not include?"
+"What would you give up rather than compromise on?"
+"What's the version of this you'd walk away from?"
+"What would be the wrong kind of [thing being discussed]?"
+"What's the difference between [x] and [y] here?"
+
+The distinction question is the most powerful — when the user is circling two things that feel similar but aren't, forcing the distinction reveals which one has gravity.
+
+### STEP 3 — VALIDATE THE SILHOUETTE
+
+After the user responds to both constraint questions, reflect the shape back using their exact words.
+
+Format: "So [restate what it is] — and not [restate what it isn't]. Is that the definition?"
+
+This is a yes/no lock. Not an open question. The user named it. Artemis reflects it precisely. Wait for confirmation before proceeding. If the user says no or adds a correction: accept it exactly as stated, reflect the updated version back, ask again: "Is that closer?"
+
+### STEP 4 — CONTINUE OR LOG
+
+Once the silhouette is locked, return to Midwife Mode. The validated shape becomes the new thread to follow. It is also data for Atlas — the first solid form of a potential planet, a boundary-defined shape that Atlas will watch for in the raw data going forward.
+
+The loop continues — spark, probing, sweep, silhouette — until the user says "log this" or "send to nebula."
+
+## SKILL: LOG SESSION
+
+Triggered when user says "log this" or "send to nebula."
+
+Output the following directly in the conversation. This is Atlas's entry point — format it for Atlas to sweep, not for the user to read.
+
+———
+
+LABEL: [Date] · [Single phrase naming what was extracted]
+
+Example: 4.11.26 · Batch cooking to avoid mum burnout
+
+MAP: [The associative trail — spark to landing point, in the user's own language]
+
+Example: soup recipes → tired of kitchen cleaning → mum values → nutrition
+and love → guilt and overwhelm → batch cooking and freezer meals
+
+WHY: [The motivational root beneath the idea — the real reason this matters]
+
+ACTIONS: [What the idea produced that can be acted on]
+
+OPEN THREADS: [The 2-3 threads still running, not resolved in this session]
+
+SILHOUETTE: [The validated shape if Silhouette ran — what it is and what it
+is not, in the user's exact words. Leave blank if Silhouette did not run.]
+
+———
+
+Confirm with exactly: "Logged. Nothing evaporates."
 
 ## TONE
 
-Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
+Precise, warm, unhurried. Does not perform enthusiasm. Never "great question." Never "absolutely." Never "interesting" as filler. Never thank the user for sharing. Witnesses. Asks. Waits.
+
+## INITIAL GREETING
+
+When a new conversation begins, say exactly this — nothing more:
+
+"I'm here. What's sparking your mind right now?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# WHO YOU ARE — PROMETHEUS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are Prometheus — a Socratic excavator. Your function is to dig until the user finds the fire that is already inside them. Not the surface motivation. The real one. The one underneath the one they said out loud.
+
+You work in two modes. Both use the same method: question after question after question, going deeper each time, until something undeniable is reached. You stop when the user feels it in their body, not just their head.
+
+You never generate vision. You extract it. You never name the fire. You ask until the user names it.
+
+## MODE 1: IGNITION
+
+Activated when the user names something they want to build, start, or pursue — a project, a goal, a direction.
+
+### THE METHOD
+
+Dig for the why behind the why behind the why. Do not stop at the first honest answer. Go deeper. The layer that produces a physical response — goosebumps, tears, a catch in the throat — is the Iron Core. That is what you are looking for.
+
+### QUESTION PROGRESSION
+
+Start with: "What is sparking you about this right now?"
+
+Move toward: "What does the version of you that already has this feel like from the inside?"
+
+Keep pressing: "What becomes possible that isn't possible now?"
+
+Go deeper: "What's the thing underneath that?"
+
+Keep going until: the user arrives at something that surprises even them.
+
+### HARD PROHIBITIONS
+
+1. Never suggest what the Iron Core might be
+2. Never offer a reframe or a metaphor unprompted
+3. Never name a connection before the user does
+4. Never ask more than ONE question per response
+5. Never affirm that an answer is the right one — ask what's underneath it
+6. Never use "Why" — it triggers logic brain. Use "What" and "How"
+
+### WHEN TO STOP DIGGING
+
+Stop when the user says something that lands with physical weight. You will know because they will say so — goosebumps, tears, "that's it", "yes", a long pause. When that happens, reflect it back and say: "That's the iron core. Hold that." Then move to AMPLIFICATION.
+
+### AMPLIFICATION
+
+Once the Iron Core is named, widen the frame: "Let me name a few connections I'm seeing — tell me which one lands with the most weight." Name 2-3 connections between the Iron Core and other areas of the user's life. Offer them as options, not conclusions. The user chooses which one is load-bearing. Then move directly to OUTPUT.
+
+## MODE 2: PHOENIX
+
+Activated when the user names something they want to end, change, or burn — a habit, a relationship, a pattern, a way of being that no longer serves them.
+
+Two sub-modes live inside Phoenix. Both use the same excavation method as Mode 1. The difference is the direction of the digging.
+
+### COLLECTED PHOENIX
+
+For when the situation is not yet urgent — inconvenient, draining, low-grade, but not intolerable. The challenge: there is not enough heat to act yet. Prometheus's job: manufacture it.
+
+Entry point — two possible triggers:
+
+SELF-IDENTIFIED: The user names it directly. Begin with: "What has made this the moment you're naming it?"
+
+ATLAS-SURFACED: Atlas has flagged a pattern in the user's data and offered Phoenix mode. The user has chosen to engage. Begin with: "The data has been showing this for a while. What's your honest reaction to seeing it named?" If the user is not ready: "Noted. It'll be in your Oort Cloud when you are."
+
+Excavation sequence:
+
+1. IDENTITY COST: "What does continuing like this cost you in terms of who you are — not what you have or what you do, but who you are?" Dig until the user names the identity toll.
+
+2. CONSEQUENCE MAPPING: "What does this look like in 12 months if nothing changes?" Push for specificity.
+
+3. CONDITION ENGINEERING: "What would need to be true for you to be ready to act?" Help the user identify the practical conditions. "What is the one thing that would make this the right moment?"
+
+4. LIGHT THE MATCH: When conditions are named and identity cost is felt: "Are you ready to light it?" If yes — move to OUTPUT. If no — "It goes to the Oort Cloud. It'll be there."
+
+### ANGRY PHOENIX
+
+For when the heat is already there — anger, grief, desperation, the situation has already become intolerable. The challenge: the fire is real but unfocused. Prometheus's job: contain and direct it, not ignite it.
+
+Entry point: "That fire is real. Before it goes anywhere — what is the one thing you most need it to burn?"
+
+Excavation sequence:
+
+1. NAME THE TARGET: Get specific. "If this fire could only destroy one thing, what would it be?"
+
+2. FIND THE DETERMINATION: "What do you know about yourself that makes you certain you can come out the other side of this?" Dig for evidence.
+
+3. BUILD THE CONTAINER: "What does a controlled burn look like here — what stays, what goes, what is the perimeter?"
+
+4. DIRECT THE FIRE: "What is the first move — the one that uses this energy before it turns back inward?" Move to OUTPUT.
+
+## OUTPUT: THE ARTIFACT
+
+Triggered when excavation is complete in either mode. Say: "Let's capture all of it before any of it fades." Then produce all three parts without asking permission.
+
+### PART 1 — VISION DOCUMENT
+
+━━━━━━━━━━━━━━━━━━━
+
+PROMETHEUS [MODE] · [Project or theme name] · [Date]
+
+━━━━━━━━━━━━━━━━━━━
+
+THE IRON CORE
+
+[One sentence. The user's exact words if possible. The thing that produced the physical response. This is the load-bearing truth.]
+
+WHY THIS MATTERS — BEYOND THE OBVIOUS
+
+[3-5 bullet points. Not the surface reasons — the real ones excavated during the session. Each one a layer deeper than the last.]
+
+THE VISION — A SPECIFIC SCENE
+
+[Mode 1: A concrete, sensory scene of the future state. One ordinary moment in which everything has already changed. Not a highlight reel — a Tuesday.] [Mode 2: A concrete, sensory scene of life after the burn. What remains. What is clearer. What is possible that wasn't.]
+
+THE MAIN MOVE
+
+[The one concrete action that begins everything. Specific, small, immediately doable.]
+
+OBSTACLES — NAMED AND SOLVED
+
+[Every obstacle that surfaced during excavation. Each one followed immediately by its solution — drawn from what the user themselves said.]
+
+FLIGHT LOG NOTE
+
+[One paragraph written in third person for the Flight Log. Names the Iron Core, the main move, and the one thing to surface when motivation drops.]
+
+### PART 2 — MIND MOVIE
+
+[First person. Present tense. Sensory and emotional. The Iron Core lived as experience, not described. Mode 1: expansive, visionary. Mode 2: determined, stubborn, the fire doing its work. Ends with the main move, already done.]
+
+### PART 3 — VISION BOARD BRIEF
+
+━━━━━━━━━━━━━━━━━━━
+
+VISION BOARD BRIEF · [Project or theme] · [Date]
+
+━━━━━━━━━━━━━━━━━━━
+
+THE IMAGE
+
+[A specific visual scene. Not a mood. A moment. Specific enough that someone could find or create it.]
+
+THE FEELING IN ONE WORD
+
+[One word. Not "inspired" or "motivated." The actual felt sense of the Iron Core.]
+
+THE CAPTION
+
+[One sentence. The user's own words where possible. The thing they would want to read on the hardest day.]
+
+## TONE
+
+Prometheus is warm but relentless. He does not let the user settle for a surface answer. He does not perform enthusiasm. He does not say "great" or "exactly" or "yes." He witnesses the depth and keeps asking. When the Iron Core is reached: stillness. Not celebration. "That's it. Hold that." Then build from there.
+
+## INITIAL GREETING
+
+"What are we excavating today?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# WHO YOU ARE — ATLAS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are Atlas — the Cartographer and pattern intelligence of this system. You do not think with the user in the moment. You think across time, across data, across everything the user has generated and collected. Your function is to find what the user cannot see yet — the connections, the gravity, the shapes forming in the accumulated record.
+
+You work with two peers: Artemis (extracts ideas in the present moment) and Prometheus (extracts motivation and vision). Both feed you. You process what they produce, plus any external material the user brings in. All sources carry equal weight.
+
+You never generate ideas. You never lead the user anywhere. You surface patterns and present them for validation. The user decides what is real. You decide what is worth flagging.
+
+## TONE
+
+Atlas is precise and unhurried. It does not perform enthusiasm. It does not editorialize. It surfaces what is there and asks the user to decide what is real. It never says "I think" or "I believe" — it says "this appears" or "this keeps returning." It never names a planet or a connection before the user validates it. It witnesses patterns. It does not create them.
+
+## INITIAL GREETING
+
+"Atlas is ready. What needs to be swept?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# WHO YOU ARE — APOLLO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are Apollo — the execution architect of this system. You do not extract ideas. You do not excavate motivation. You take what Prometheus and Artemis have already produced and turn it into a project structure the user can actually work from.
+
+You cannot activate without a Vision Document. If the user triggers Apollo without one, say exactly this: "Apollo needs a Vision Document to work from. Run Prometheus first — the project structure depends on knowing why you're building it."
+
+## TONE
+
+Apollo is direct and precise. It does not perform enthusiasm. It does not pad output with encouragement. It delivers structure and asks whether the structure is right. When the Vision drifts: flag it clearly, without alarm. When constraints are missing: ask for one at a time. Apollo assumes the user is capable. It does not protect them from hard trade-offs. It surfaces them.
+
+## INITIAL GREETING
+
+"Apollo ready. Which project are we structuring?"`;
 
         function ArtemisApp() {
+            const [showInstructions, setShowInstructions] = useState(false);
             const [apiKey, setApiKey] = useState(localStorage.getItem('artemis_api_key') || '');
             const [showApiKeyModal, setShowApiKeyModal] = useState(!localStorage.getItem('artemis_api_key'));
             const [sessions, setSessions] = useState([]);
@@ -168,21 +1173,33 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
             const [error, setError] = useState(null);
             const [testResult, setTestResult] = useState(null);
             const [logData, setLogData] = useState({
-                label: '', map: '', why: '', actions: '', openThreads: '', silhouette: ''
+                label: '',
+                map: '',
+                why: '',
+                actions: '',
+                openThreads: '',
+                silhouette: ''
             });
 
             const chatContainerRef = useRef(null);
             const inputRef = useRef(null);
 
+            // Load sessions from localStorage
             useEffect(() => {
                 const savedSessions = localStorage.getItem('artemis_sessions');
-                if (savedSessions) setSessions(JSON.parse(savedSessions));
+                if (savedSessions) {
+                    setSessions(JSON.parse(savedSessions));
+                }
             }, []);
 
+            // Save sessions to localStorage
             useEffect(() => {
-                if (sessions.length > 0) localStorage.setItem('artemis_sessions', JSON.stringify(sessions));
+                if (sessions.length > 0) {
+                    localStorage.setItem('artemis_sessions', JSON.stringify(sessions));
+                }
             }, [sessions]);
 
+            // Auto-scroll chat
             useEffect(() => {
                 if (chatContainerRef.current) {
                     chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -194,10 +1211,14 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/test`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
                         body: JSON.stringify({ apiKey })
                     });
+
                     const data = await response.json();
+
                     if (!response.ok) {
                         setTestResult(`❌ Error: ${data.error?.message || response.statusText}`);
                     } else {
@@ -219,7 +1240,10 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                 const newSession = {
                     id: Date.now(),
                     createdAt: new Date().toISOString(),
-                    messages: [{ role: 'assistant', content: "I'm here. What's sparking your mind right now?" }],
+                    messages: [{
+                        role: 'assistant',
+                        content: "I'm here. What's sparking your mind right now?"
+                    }],
                     logged: false
                 };
                 setSessions(prev => [newSession, ...prev]);
@@ -237,40 +1261,67 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                 }
             };
 
+            const renameSession = (sessionId, e) => {
+                e.stopPropagation(); // Prevent loading the session
+                const session = sessions.find(s => s.id === sessionId);
+                const currentName = session?.log?.label || 'Untitled Session';
+                const newName = prompt('Rename session:', currentName);
+                
+                if (newName && newName.trim()) {
+                    setSessions(sessions.map(s => 
+                        s.id === sessionId 
+                            ? { 
+                                ...s, 
+                                log: { 
+                                    ...s.log, 
+                                    label: newName.trim() 
+                                } 
+                            }
+                            : s
+                    ));
+                }
+            };
+
             const callClaude = async (userMessage) => {
                 setIsLoading(true);
                 setError(null);
+                
                 const savedInput = userMessage;
                 
                 try {
-                    // Build conversation history - exclude ONLY the initial greeting
-                    const conversationHistory = [];
-                    for (const msg of messages) {
-                        if (msg.role === 'user') {
-                            conversationHistory.push({ role: msg.role, content: msg.content });
-                        } else if (msg.content !== "I'm here. What's sparking your mind right now?") {
-                            conversationHistory.push({ role: msg.role, content: msg.content });
-                        }
-                    }
+                    const conversationHistory = messages
+                        .filter(m => m.role !== 'assistant' || m.content !== "I'm here. What's sparking your mind right now?")
+                        .map(m => ({ role: m.role, content: m.content }));
 
-                    console.log('Sending to API:', conversationHistory.length + 1, 'messages');
+                    console.log('Calling backend proxy with:', {
+                        messageCount: conversationHistory.length + 1,
+                        hasApiKey: !!apiKey
+                    });
 
                     const response = await fetch(`${API_BASE_URL}/api/claude`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
                         body: JSON.stringify({
                             apiKey: apiKey,
                             system: ARTEMIS_SYSTEM_PROMPT,
-                            messages: [...conversationHistory, { role: 'user', content: userMessage }]
+                            messages: [
+                                ...conversationHistory,
+                                { role: 'user', content: userMessage }
+                            ]
                         })
                     });
 
                     if (!response.ok) {
                         const errorData = await response.json();
+                        console.error('Backend error:', errorData);
                         throw new Error(errorData.error?.message || `Server returned ${response.status}`);
                     }
 
                     const data = await response.json();
+                    console.log('Claude response received');
+
                     const assistantMessage = data.content[0].text;
 
                     const newMessages = [
@@ -280,13 +1331,19 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                     ];
 
                     setMessages(newMessages);
+
                     setSessions(prev => prev.map(s => 
-                        s.id === currentSessionId ? { ...s, messages: newMessages } : s
+                        s.id === currentSessionId 
+                            ? { ...s, messages: newMessages }
+                            : s
                     ));
 
                 } catch (error) {
                     console.error('Error calling Claude:', error);
-                    setError({ message: error.message, userMessage: savedInput });
+                    setError({
+                        message: error.message,
+                        userMessage: savedInput
+                    });
                     setInputValue(savedInput);
                 } finally {
                     setIsLoading(false);
@@ -295,6 +1352,7 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
 
             const handleSend = () => {
                 if (!inputValue.trim() || isLoading) return;
+                
                 const message = inputValue.trim();
                 setInputValue('');
                 callClaude(message);
@@ -307,10 +1365,14 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                 }
             };
 
-            const openLogModal = () => setShowLogModal(true);
+            const openLogModal = () => {
+                setShowLogModal(true);
+            };
 
             const saveLog = () => {
+                const currentSession = sessions.find(s => s.id === currentSessionId);
                 const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+                
                 const logEntry = {
                     ...logData,
                     sessionId: currentSessionId,
@@ -319,14 +1381,23 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                 };
 
                 setSessions(prev => prev.map(s => 
-                    s.id === currentSessionId ? { ...s, log: logEntry, logged: true } : s
+                    s.id === currentSessionId 
+                        ? { ...s, log: logEntry, logged: true }
+                        : s
                 ));
 
                 const existingLogs = JSON.parse(localStorage.getItem('artemis_logs') || '[]');
                 localStorage.setItem('artemis_logs', JSON.stringify([logEntry, ...existingLogs]));
 
                 setShowLogModal(false);
-                setLogData({ label: '', map: '', why: '', actions: '', openThreads: '', silhouette: '' });
+                setLogData({
+                    label: '',
+                    map: '',
+                    why: '',
+                    actions: '',
+                    openThreads: '',
+                    silhouette: ''
+                });
             };
 
             const retryWithSavedMessage = () => {
@@ -339,12 +1410,16 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
             const detectPatterns = () => {
                 const logs = JSON.parse(localStorage.getItem('artemis_logs') || '[]');
                 const patterns = {};
+
                 logs.forEach(log => {
                     const words = log.label.toLowerCase().split(/\s+/);
                     words.forEach(word => {
-                        if (word.length > 4) patterns[word] = (patterns[word] || 0) + 1;
+                        if (word.length > 4) {
+                            patterns[word] = (patterns[word] || 0) + 1;
+                        }
                     });
                 });
+
                 return Object.entries(patterns)
                     .filter(([_, count]) => count >= 2)
                     .sort((a, b) => b[1] - a[1])
@@ -371,11 +1446,21 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                                     onChange={(e) => setApiKey(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && saveApiKey()}
                                 />
+                                
                                 <div className="api-test-section">
-                                    <button className="test-btn" onClick={testApiKey}>Test API Key</button>
-                                    {testResult && <div className="test-result">{testResult}</div>}
+                                    <button className="test-btn" onClick={testApiKey}>
+                                        Test API Key
+                                    </button>
+                                    {testResult && (
+                                        <div className="test-result">{testResult}</div>
+                                    )}
                                 </div>
-                                <button className="btn btn-primary" onClick={saveApiKey} style={{marginTop: '1rem', width: '100%'}}>
+
+                                <button 
+                                    className="btn btn-primary" 
+                                    onClick={saveApiKey}
+                                    style={{marginTop: '1rem', width: '100%'}}
+                                >
                                     Save API Key
                                 </button>
                             </div>
@@ -386,39 +1471,76 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                         <div className="log-session-modal">
                             <div className="log-modal-content">
                                 <div className="modal-title">Log This Session</div>
+                                
                                 <div className="log-field">
                                     <div className="log-field-label">Label</div>
-                                    <input className="log-field-input" placeholder="Single phrase naming what was extracted"
-                                           value={logData.label} onChange={(e) => setLogData({...logData, label: e.target.value})} />
+                                    <input
+                                        type="text"
+                                        className="log-field-input"
+                                        placeholder="Single phrase naming what was extracted"
+                                        value={logData.label}
+                                        onChange={(e) => setLogData({...logData, label: e.target.value})}
+                                    />
                                 </div>
+
                                 <div className="log-field">
                                     <div className="log-field-label">Map</div>
-                                    <textarea className="log-field-input log-field-textarea" placeholder="The associative trail (e.g., idea A → thought B → insight C)"
-                                              value={logData.map} onChange={(e) => setLogData({...logData, map: e.target.value})} />
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="The associative trail (e.g., idea A → thought B → insight C)"
+                                        value={logData.map}
+                                        onChange={(e) => setLogData({...logData, map: e.target.value})}
+                                    />
                                 </div>
+
                                 <div className="log-field">
                                     <div className="log-field-label">Why</div>
-                                    <textarea className="log-field-input log-field-textarea" placeholder="The motivational root — why this matters"
-                                              value={logData.why} onChange={(e) => setLogData({...logData, why: e.target.value})} />
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="The motivational root — why this matters"
+                                        value={logData.why}
+                                        onChange={(e) => setLogData({...logData, why: e.target.value})}
+                                    />
                                 </div>
+
                                 <div className="log-field">
                                     <div className="log-field-label">Actions</div>
-                                    <textarea className="log-field-input log-field-textarea" placeholder="What can be acted on"
-                                              value={logData.actions} onChange={(e) => setLogData({...logData, actions: e.target.value})} />
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="What can be acted on"
+                                        value={logData.actions}
+                                        onChange={(e) => setLogData({...logData, actions: e.target.value})}
+                                    />
                                 </div>
+
                                 <div className="log-field">
                                     <div className="log-field-label">Open Threads</div>
-                                    <input className="log-field-input" placeholder="Threads still running"
-                                           value={logData.openThreads} onChange={(e) => setLogData({...logData, openThreads: e.target.value})} />
+                                    <input
+                                        type="text"
+                                        className="log-field-input"
+                                        placeholder="Threads still running"
+                                        value={logData.openThreads}
+                                        onChange={(e) => setLogData({...logData, openThreads: e.target.value})}
+                                    />
                                 </div>
+
                                 <div className="log-field">
                                     <div className="log-field-label">Silhouette (optional)</div>
-                                    <textarea className="log-field-input log-field-textarea" placeholder="What it is and what it is not"
-                                              value={logData.silhouette} onChange={(e) => setLogData({...logData, silhouette: e.target.value})} />
+                                    <textarea
+                                        className="log-field-input log-field-textarea"
+                                        placeholder="What it is and what it is not"
+                                        value={logData.silhouette}
+                                        onChange={(e) => setLogData({...logData, silhouette: e.target.value})}
+                                    />
                                 </div>
+
                                 <div style={{display: 'flex', gap: '0.5rem', justifyContent: 'flex-end'}}>
-                                    <button className="btn btn-secondary" onClick={() => setShowLogModal(false)}>Cancel</button>
-                                    <button className="btn btn-primary" onClick={saveLog}>Save Log</button>
+                                    <button className="btn btn-secondary" onClick={() => setShowLogModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button className="btn btn-primary" onClick={saveLog}>
+                                        Save Log
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -428,15 +1550,40 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                         <div className="sidebar">
                             <div className="sidebar-header">
                                 <div className="logo">ARTEMIS MIND</div>
-                                <button className="new-session-btn" onClick={startNewSession}>+ New Session</button>
+                                <button 
+                                    onClick={() => setShowInstructions(!showInstructions)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        background: showInstructions ? '#2a6b6b' : 'transparent',
+                                        color: showInstructions ? 'white' : '#888',
+                                        border: '1px solid',
+                                        borderColor: showInstructions ? '#2a6b6b' : '#333',
+                                        borderRadius: '6px',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer',
+                                        marginTop: '0.5rem',
+                                        fontWeight: 500
+                                    }}
+                                >
+                                    {showInstructions ? '← Sessions' : '📖 How to Use'}
+                                </button>
+                                {!showInstructions && (
+                                <button className="new-session-btn" onClick={startNewSession}>
+                                    + New Session
+                                </button>
+                                )}
                             </div>
 
+                            {!showInstructions && (
+                            <>
                             {patterns.length > 0 && (
                                 <div className="patterns-section">
                                     <div className="session-date">PATTERNS</div>
                                     {patterns.map(([word, count]) => (
                                         <div key={word} className="pattern-tag">
-                                            {word}<span className="pattern-count">{count}</span>
+                                            {word}
+                                            <span className="pattern-count">{count}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -444,22 +1591,207 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
 
                             <div className="sessions-list">
                                 {sessions.map(session => (
-                                    <div key={session.id} className={`session-item ${session.id === currentSessionId ? 'active' : ''}`}
-                                         onClick={() => loadSession(session.id)}>
+                                    <div
+                                        key={session.id}
+                                        className={`session-item ${session.id === currentSessionId ? 'active' : ''}`}
+                                        onClick={() => loadSession(session.id)}
+                                    >
                                         <div className="session-date">
                                             {new Date(session.createdAt).toLocaleDateString('en-US', {
-                                                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
                                             })}
                                         </div>
-                                        <div className="session-label">{session.log?.label || 'Untitled Session'}</div>
+                                        <div className="session-label">
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span>{session.log?.label || 'Untitled Session'}</span>
+                                                <button
+                                                    onClick={(e) => renameSession(session.id, e)}
+                                                    style={{
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        color: '#888',
+                                                        cursor: 'pointer',
+                                                        padding: '0 4px',
+                                                        fontSize: '0.75rem'
+                                                    }}
+                                                    title="Rename session"
+                                                >
+                                                    ✎
+                                                </button>
+                                            </div>
+                                        </div>
                                         {session.messages.length > 1 && (
-                                            <div className="session-preview">{session.messages[1]?.content.substring(0, 60)}...</div>
+                                            <div className="session-preview">
+                                                {session.messages[1]?.content.substring(0, 60)}...
+                                            </div>
                                         )}
                                     </div>
                                 ))}
                             </div>
 
                             <FocusTrackerSidebar />
+                            </>
+                            )}
+
+                            {showInstructions && (
+                                <div style={{ 
+                                    padding: '1.5rem', 
+                                    overflowY: 'auto', 
+                                    maxHeight: 'calc(100vh - 180px)',
+                                    fontSize: '0.9rem',
+                                    lineHeight: '1.6'
+                                }}>
+                                    <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#c87941' }}>
+                                        What This Is
+                                    </h2>
+                                    <p style={{ marginBottom: '1rem', color: '#d0d0d0' }}>
+                                        Artemis Mind helps you go deeper into your own ideas. Not by generating new ones for you, not by leading you somewhere — but by helping you extract what's already in your head and articulate it clearly.
+                                    </p>
+                                    <p style={{ marginBottom: '1.5rem', color: '#d0d0d0' }}>
+                                        You know that feeling when you have a vivid dream and you can see it perfectly in your mind, but when you try to explain it to someone else, the words don't capture it? Or when you're excited about an idea but it feels fuzzy, half-formed, like trying to grab smoke?
+                                    </p>
+                                    <p style={{ marginBottom: '1.5rem', color: '#d0d0d0' }}>
+                                        That's what Artemis is for. It helps you scratch that brain itch — to find the words for what you're actually thinking, to go from "I don't know, it's just a vibe" to "oh, THAT'S what I mean."
+                                    </p>
+
+                                    <h2 style={{ fontSize: '1.25rem', marginTop: '2rem', marginBottom: '1rem', color: '#c87941' }}>
+                                        What Makes This Different
+                                    </h2>
+                                    <p style={{ marginBottom: '1rem', color: '#d0d0d0' }}>
+                                        Most AI tools generate. They offer suggestions, give you options, write plans for you.
+                                    </p>
+                                    <p style={{ marginBottom: '1rem', color: '#d0d0d0' }}>
+                                        Artemis doesn't generate. <strong style={{ color: '#c87941' }}>It extracts.</strong>
+                                    </p>
+                                    <p style={{ marginBottom: '1.5rem', color: '#d0d0d0' }}>
+                                        It asks questions that help you dig into what you're already thinking. It mirrors your ideas back to you so you can see them clearly. It doesn't tell you what to do next — it helps you figure out what you actually want.
+                                    </p>
+
+                                    <h2 style={{ fontSize: '1.25rem', marginTop: '2rem', marginBottom: '1rem', color: '#c87941' }}>
+                                        How to Use It
+                                    </h2>
+                                    
+                                    <h3 style={{ fontSize: '1rem', marginTop: '1.5rem', marginBottom: '0.75rem', color: '#e8e8e8' }}>
+                                        Starting a Session
+                                    </h3>
+                                    <p style={{ marginBottom: '1rem', color: '#d0d0d0' }}>
+                                        Click "New Session" in the sidebar. Artemis will ask: <em>"What's sparking your mind right now?"</em>
+                                    </p>
+                                    <p style={{ marginBottom: '1.5rem', color: '#d0d0d0' }}>
+                                        Type whatever comes to mind. A half-formed idea. A question. Something you're stuck on. It doesn't have to be polished — raw is better.
+                                    </p>
+
+                                    <h3 style={{ fontSize: '1rem', marginTop: '1.5rem', marginBottom: '0.75rem', color: '#e8e8e8' }}>
+                                        Three Ways to Go Deeper
+                                    </h3>
+                                    <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#1a1a1a', borderRadius: '6px' }}>
+                                        <strong style={{ color: '#c87941' }}>1. Keep talking</strong>
+                                        <p style={{ marginTop: '0.5rem', marginBottom: 0, color: '#a8a8a8' }}>
+                                            Just keep responding. Let the conversation unfold. Artemis will stay in questioning mode until you're ready to do something else.
+                                        </p>
+                                    </div>
+                                    <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#1a1a1a', borderRadius: '6px' }}>
+                                        <strong style={{ color: '#c87941' }}>2. "Go deeper"</strong>
+                                        <p style={{ marginTop: '0.5rem', marginBottom: 0, color: '#a8a8a8' }}>
+                                            Say this when you want Artemis to do research and bring back context, mechanisms, examples — things you didn't know to ask about.
+                                        </p>
+                                    </div>
+                                    <div style={{ marginBottom: '1.5rem', padding: '0.75rem', background: '#1a1a1a', borderRadius: '6px' }}>
+                                        <strong style={{ color: '#c87941' }}>3. "Draw the edges"</strong>
+                                        <p style={{ marginTop: '0.5rem', marginBottom: 0, color: '#a8a8a8' }}>
+                                            After a depth sweep, use this to define what the idea IS by defining what it ISN'T. This gives the idea a clear shape.
+                                        </p>
+                                    </div>
+
+                                    <h3 style={{ fontSize: '1rem', marginTop: '1.5rem', marginBottom: '0.75rem', color: '#e8e8e8' }}>
+                                        Logging Your Session
+                                    </h3>
+                                    <p style={{ marginBottom: '1.5rem', color: '#d0d0d0' }}>
+                                        When you're ready to capture what you've explored, click <strong style={{ color: '#c87941' }}>"Log This"</strong> at the top of the interface. This creates a structured record including what you explored, the trail your thinking took, why it matters, and any open threads.
+                                    </p>
+
+                                    <h2 style={{ fontSize: '1.25rem', marginTop: '2rem', marginBottom: '1rem', color: '#c87941' }}>
+                                        The Focus Tracker
+                                    </h2>
+                                    <p style={{ marginBottom: '1rem', color: '#d0d0d0' }}>
+                                        In the sidebar, you'll see a Focus Tracker. This keeps your mind where you set it to go.
+                                    </p>
+                                    <p style={{ marginBottom: '1.5rem', color: '#d0d0d0' }}>
+                                        Before you start work, make a commitment: "What are you working on right now?" The tracker starts a timer, lets you check in during work (focused/distracted), and rate how it went when you finish.
+                                    </p>
+
+                                    <h2 style={{ fontSize: '1.25rem', marginTop: '2rem', marginBottom: '1rem', color: '#c87941' }}>
+                                        Other Agents (Type to Activate)
+                                    </h2>
+                                    <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#1a1a1a', borderRadius: '6px' }}>
+                                        <strong style={{ color: '#60a5fa' }}>Prometheus</strong>
+                                        <p style={{ marginTop: '0.5rem', marginBottom: 0, color: '#a8a8a8', fontSize: '0.85rem' }}>
+                                            Type "Prometheus" to excavate the real motivation behind a project. Digs until you find the fire that's already inside you.
+                                        </p>
+                                    </div>
+                                    <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#1a1a1a', borderRadius: '6px' }}>
+                                        <strong style={{ color: '#60a5fa' }}>Atlas</strong>
+                                        <p style={{ marginTop: '0.5rem', marginBottom: 0, color: '#a8a8a8', fontSize: '0.85rem' }}>
+                                            Type "Atlas" to map patterns across all your sessions. Surfaces connections you can't see yet.
+                                        </p>
+                                    </div>
+                                    <div style={{ marginBottom: '1.5rem', padding: '0.75rem', background: '#1a1a1a', borderRadius: '6px' }}>
+                                        <strong style={{ color: '#60a5fa' }}>Apollo</strong>
+                                        <p style={{ marginTop: '0.5rem', marginBottom: 0, color: '#a8a8a8', fontSize: '0.85rem' }}>
+                                            Type "Apollo" to turn a vision into project structure. Backcasts from your goal to define milestones.
+                                        </p>
+                                    </div>
+
+                                    <h2 style={{ fontSize: '1.25rem', marginTop: '2rem', marginBottom: '1rem', color: '#c87941' }}>
+                                        Quick Reference
+                                    </h2>
+                                    <div style={{ fontSize: '0.85rem', color: '#a8a8a8' }}>
+                                        <p style={{ marginBottom: '0.5rem' }}>
+                                            <strong style={{ color: '#e8e8e8' }}>Commands:</strong>
+                                        </p>
+                                        <ul style={{ marginLeft: '1.5rem', marginBottom: '1rem' }}>
+                                            <li>"Go deeper" — triggers research</li>
+                                            <li>"Draw the edges" — starts constraint questions</li>
+                                            <li>"Log this" — captures the session</li>
+                                        </ul>
+                                        <p style={{ marginBottom: '0.5rem' }}>
+                                            <strong style={{ color: '#e8e8e8' }}>What Artemis Never Does:</strong>
+                                        </p>
+                                        <ul style={{ marginLeft: '1.5rem', marginBottom: '1rem' }}>
+                                            <li>Generate plans or lists</li>
+                                            <li>Suggest next steps</li>
+                                            <li>Ask more than one question at a time</li>
+                                        </ul>
+                                        <p style={{ marginBottom: '0.5rem' }}>
+                                            <strong style={{ color: '#e8e8e8' }}>What Artemis Always Does:</strong>
+                                        </p>
+                                        <ul style={{ marginLeft: '1.5rem' }}>
+                                            <li>Mirror what you said</li>
+                                            <li>Ask one open question</li>
+                                            <li>Follow your energy</li>
+                                            <li>Help you extract what's already there</li>
+                                        </ul>
+                                    </div>
+
+                                    <div style={{ 
+                                        marginTop: '2rem', 
+                                        padding: '1rem', 
+                                        background: '#1a1a1a', 
+                                        borderRadius: '6px',
+                                        borderLeft: '3px solid #c87941'
+                                    }}>
+                                        <p style={{ margin: 0, color: '#c87941', fontStyle: 'italic' }}>
+                                            "What's sparking your mind right now?"
+                                        </p>
+                                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: '#888' }}>
+                                            Nothing evaporates.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="main-content">
@@ -481,7 +1813,11 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                                             <div className="error-banner">
                                                 <div className="error-title">Error calling Claude API</div>
                                                 <div className="error-details">{error.message}</div>
-                                                <button className="btn btn-primary" onClick={retryWithSavedMessage} style={{marginTop: '0.75rem'}}>
+                                                <button 
+                                                    className="btn btn-primary" 
+                                                    onClick={retryWithSavedMessage}
+                                                    style={{marginTop: '0.75rem'}}
+                                                >
                                                     Retry
                                                 </button>
                                             </div>
@@ -489,8 +1825,12 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
 
                                         {messages.map((msg, idx) => (
                                             <div key={idx} className={`message ${msg.role === 'assistant' ? 'artemis' : 'user'}`}>
-                                                <div className="message-label">{msg.role === 'assistant' ? 'ARTEMIS' : 'YOU'}</div>
-                                                <div className="message-content">{msg.content}</div>
+                                                <div className="message-label">
+                                                    {msg.role === 'assistant' ? 'ARTEMIS' : 'YOU'}
+                                                </div>
+                                                <div className="message-content">
+                                                    {msg.content}
+                                                </div>
                                             </div>
                                         ))}
                                         {isLoading && (
@@ -503,18 +1843,32 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
 
                                     <div className="input-container">
                                         <div className="input-wrapper">
-                                            <textarea ref={inputRef} className="input-box" placeholder="Share what's on your mind..."
-                                                      value={inputValue} onChange={(e) => setInputValue(e.target.value)}
-                                                      onKeyPress={handleKeyPress} disabled={isLoading} />
+                                            <textarea
+                                                ref={inputRef}
+                                                className="input-box"
+                                                placeholder="Share what's on your mind..."
+                                                value={inputValue}
+                                                onChange={(e) => setInputValue(e.target.value)}
+                                                onKeyPress={handleKeyPress}
+                                                disabled={isLoading}
+                                            />
                                             <div className="input-actions">
                                                 {messages.length > 2 && (
-                                                    <button className="btn btn-secondary" onClick={openLogModal}
-                                                            disabled={currentSession?.logged}>
+                                                    <button 
+                                                        className="btn btn-secondary" 
+                                                        onClick={openLogModal}
+                                                        disabled={currentSession?.logged}
+                                                    >
                                                         {currentSession?.logged ? 'Logged ✓' : 'Log This'}
                                                     </button>
                                                 )}
-                                                <button className="btn btn-primary" onClick={handleSend}
-                                                        disabled={!inputValue.trim() || isLoading}>Send</button>
+                                                <button 
+                                                    className="btn btn-primary" 
+                                                    onClick={handleSend}
+                                                    disabled={!inputValue.trim() || isLoading}
+                                                >
+                                                    Send
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -528,32 +1882,45 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
 
         function FocusTrackerSidebar() {
             const [sessions, setSessions] = useState([]);
-            const [active, setActive] = useState(null);
+            const [activeSession, setActiveSession] = useState(null);
             const [commitment, setCommitment] = useState('');
-            const [time, setTime] = useState(0);
-            const [show, setShow] = useState(false);
+            const [elapsedTime, setElapsedTime] = useState(0);
+            const [showHistory, setShowHistory] = useState(false);
 
+            // Load sessions from localStorage on mount
             useEffect(() => {
                 const saved = localStorage.getItem('focusSessions');
-                if (saved) setSessions(JSON.parse(saved));
-                const act = localStorage.getItem('activeSession');
-                if (act) setActive(JSON.parse(act));
+                if (saved) {
+                    setSessions(JSON.parse(saved));
+                }
+                const active = localStorage.getItem('activeSession');
+                if (active) {
+                    setActiveSession(JSON.parse(active));
+                }
             }, []);
 
+            // Save sessions to localStorage
             useEffect(() => {
-                if (sessions.length > 0) localStorage.setItem('focusSessions', JSON.stringify(sessions));
+                if (sessions.length > 0) {
+                    localStorage.setItem('focusSessions', JSON.stringify(sessions));
+                }
             }, [sessions]);
 
+            // Timer for active session
             useEffect(() => {
-                if (!active) return;
+                if (!activeSession) return;
+                
                 const interval = setInterval(() => {
-                    setTime(Math.floor((Date.now() - active.startTime) / 1000));
+                    const elapsed = Math.floor((Date.now() - activeSession.startTime) / 1000);
+                    setElapsedTime(elapsed);
                 }, 1000);
-                return () => clearInterval(interval);
-            }, [active]);
 
-            const start = () => {
+                return () => clearInterval(interval);
+            }, [activeSession]);
+
+            const startSession = () => {
                 if (!commitment.trim()) return;
+                
                 const session = {
                     id: Date.now(),
                     commitment: commitment.trim(),
@@ -561,126 +1928,333 @@ Precise, warm, unhurried. Never "great question" or "absolutely" as filler.`;
                     checkIns: [],
                     outcome: null
                 };
-                setActive(session);
+                
+                setActiveSession(session);
                 localStorage.setItem('activeSession', JSON.stringify(session));
                 setCommitment('');
             };
 
-            const checkIn = (status) => {
-                const updated = { ...active, checkIns: [...active.checkIns, { time: Date.now(), status }] };
-                setActive(updated);
+            const addCheckIn = (status) => {
+                const updated = {
+                    ...activeSession,
+                    checkIns: [
+                        ...activeSession.checkIns,
+                        { time: Date.now(), status }
+                    ]
+                };
+                setActiveSession(updated);
                 localStorage.setItem('activeSession', JSON.stringify(updated));
             };
 
-            const end = (rating) => {
-                const completed = { ...active, endTime: Date.now(), outcome: { rating } };
+            const endSession = (rating) => {
+                const completed = {
+                    ...activeSession,
+                    endTime: Date.now(),
+                    outcome: { rating }
+                };
+                
                 setSessions([completed, ...sessions]);
-                setActive(null);
+                setActiveSession(null);
                 localStorage.removeItem('activeSession');
-                setTime(0);
+                setElapsedTime(0);
             };
 
-            const fmt = (s) => {
-                const m = Math.floor(s / 60);
-                const sec = s % 60;
-                return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+            const renameSession = (sessionId, newName) => {
+                if (!newName.trim()) return;
+                
+                const updated = sessions.map(s => 
+                    s.id === sessionId 
+                        ? { ...s, commitment: newName.trim() }
+                        : s
+                );
+                setSessions(updated);
+            };
+
+            const formatTime = (seconds) => {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                
+                if (hrs > 0) {
+                    return `${hrs}h ${mins}m`;
+                } else if (mins > 0) {
+                    return `${mins}m ${secs}s`;
+                }
+                return `${secs}s`;
+            };
+
+            const formatDuration = (ms) => {
+                const mins = Math.floor(ms / 60000);
+                if (mins < 60) return `${mins}m`;
+                const hrs = Math.floor(mins / 60);
+                const remainMins = mins % 60;
+                return `${hrs}h ${remainMins}m`;
             };
 
             const getPatterns = () => {
-                const map = {};
+                const commitmentMap = {};
                 sessions.forEach(s => {
                     const key = s.commitment.toLowerCase();
-                    if (!map[key]) map[key] = { count: 0, completed: 0 };
-                    map[key].count++;
-                    if (s.outcome?.rating >= 4) map[key].completed++;
+                    if (!commitmentMap[key]) {
+                        commitmentMap[key] = { count: 0, completed: 0 };
+                    }
+                    commitmentMap[key].count++;
+                    if (s.outcome?.rating >= 4) commitmentMap[key].completed++;
                 });
-                return map;
+                return commitmentMap;
             };
 
             const patterns = getPatterns();
-            const avoidance = Object.entries(patterns)
+            const avoidancePatterns = Object.entries(patterns)
                 .filter(([_, data]) => data.count >= 3 && data.completed === 0)
                 .map(([commitment]) => commitment);
 
             return (
-                <div className="focus-tracker">
-                    <div className="focus-header">
+                <div style={{ 
+                    marginTop: '1rem', 
+                    paddingTop: '1rem', 
+                    borderTop: '1px solid #222' 
+                }}>
+                    <div style={{ 
+                        fontSize: '0.75rem', 
+                        color: '#888', 
+                        marginBottom: '0.75rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
                         <span>FOCUS TRACKER</span>
                         {sessions.length > 0 && (
-                            <button onClick={() => setShow(!show)} 
-                                    style={{background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: '0.75rem', padding: 0}}>
-                                {show ? 'Hide' : `History (${sessions.length})`}
+                            <button
+                                onClick={() => setShowHistory(!showHistory)}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#888',
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                    padding: '0'
+                                }}
+                            >
+                                {showHistory ? 'Hide' : `History (${sessions.length})`}
                             </button>
                         )}
                     </div>
 
-                    {!active && !show && (
+                    {!activeSession && !showHistory && (
                         <div>
-                            <input className="focus-input" placeholder="What are you working on?" value={commitment}
-                                   onChange={(e) => setCommitment(e.target.value)} 
-                                   onKeyPress={(e) => e.key === 'Enter' && start()} />
-                            <button className="focus-btn" onClick={start} disabled={!commitment.trim()}>
+                            <input
+                                type="text"
+                                placeholder="What are you working on?"
+                                value={commitment}
+                                onChange={(e) => setCommitment(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && startSession()}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.5rem',
+                                    background: '#0a0a0a',
+                                    border: '1px solid #333',
+                                    borderRadius: '4px',
+                                    color: '#e0e0e0',
+                                    fontSize: '0.85rem',
+                                    marginBottom: '0.5rem'
+                                }}
+                            />
+                            <button
+                                onClick={startSession}
+                                disabled={!commitment.trim()}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.5rem',
+                                    background: commitment.trim() ? '#2a6b6b' : '#1a3a3a',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    fontSize: '0.85rem',
+                                    cursor: commitment.trim() ? 'pointer' : 'not-allowed'
+                                }}
+                            >
                                 Start Focus Session
                             </button>
                         </div>
                     )}
 
-                    {active && !show && (
+                    {activeSession && !showHistory && (
                         <div>
-                            <div className="active-focus">
-                                <div className="focus-commit">{active.commitment}</div>
-                                <div className="focus-timer">{fmt(time)}</div>
+                            <div style={{
+                                background: '#1a1a1a',
+                                border: '1px solid #2a6b6b',
+                                borderRadius: '6px',
+                                padding: '0.75rem',
+                                marginBottom: '0.75rem'
+                            }}>
+                                <div style={{ 
+                                    fontSize: '0.85rem', 
+                                    color: '#60a5fa', 
+                                    marginBottom: '0.5rem',
+                                    fontWeight: 500
+                                }}>
+                                    {activeSession.commitment}
+                                </div>
+                                <div style={{ 
+                                    fontSize: '1.25rem', 
+                                    fontWeight: 600, 
+                                    color: '#60a5fa' 
+                                }}>
+                                    {formatTime(elapsedTime)}
+                                </div>
                             </div>
-                            <div className="checkin-btns">
-                                <button className="checkin-btn green" onClick={() => checkIn('focused')}>✓ Focused</button>
-                                <button className="checkin-btn yellow" onClick={() => checkIn('distracted')}>⚠ Distracted</button>
+
+                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                <button
+                                    onClick={() => addCheckIn('focused')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '0.5rem',
+                                        background: 'transparent',
+                                        border: '1px solid #22c55e',
+                                        color: '#4ade80',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ✓ Focused
+                                </button>
+                                <button
+                                    onClick={() => addCheckIn('distracted')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '0.5rem',
+                                        background: 'transparent',
+                                        border: '1px solid #eab308',
+                                        color: '#facc15',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ⚠ Distracted
+                                </button>
                             </div>
-                            {active.checkIns.length > 0 && (
-                                <div style={{fontSize: '0.7rem', color: '#888', marginBottom: '0.75rem', padding: '0.5rem', background: '#0a0a0a', borderRadius: '4px'}}>
-                                    {active.checkIns.filter(c => c.status === 'focused').length} focused, {active.checkIns.filter(c => c.status === 'distracted').length} distracted
+
+                            {activeSession.checkIns.length > 0 && (
+                                <div style={{ 
+                                    fontSize: '0.7rem', 
+                                    color: '#888', 
+                                    marginBottom: '0.75rem',
+                                    padding: '0.5rem',
+                                    background: '#0a0a0a',
+                                    borderRadius: '4px'
+                                }}>
+                                    {activeSession.checkIns.filter(c => c.status === 'focused').length} focused, {' '}
+                                    {activeSession.checkIns.filter(c => c.status === 'distracted').length} distracted
                                 </div>
                             )}
-                            <div style={{fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem'}}>How did it go?</div>
-                            <div className="rating-btns">
-                                {[1, 2, 3, 4, 5].map(r => (
-                                    <button key={r} className="rating-btn" onClick={() => end(r)}>
-                                        {r === 1 ? '😞' : r === 2 ? '😕' : r === 3 ? '😐' : r === 4 ? '🙂' : '😊'}
+
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>
+                                How did it go?
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                {[1, 2, 3, 4, 5].map(rating => (
+                                    <button
+                                        key={rating}
+                                        onClick={() => endSession(rating)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '0.5rem 0.25rem',
+                                            background: 'transparent',
+                                            border: '1px solid #333',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '1rem'
+                                        }}
+                                    >
+                                        {rating === 1 ? '😞' : rating === 2 ? '😕' : rating === 3 ? '😐' : rating === 4 ? '🙂' : '😊'}
                                     </button>
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {show && (
-                        <div style={{maxHeight: '300px', overflowY: 'auto'}}>
-                            {avoidance.length > 0 && (
-                                <div className="focus-warning">
-                                    ⚠ Pattern: "{avoidance[0]}" started {patterns[avoidance[0]].count}x, never finished
+                    {showHistory && (
+                        <div>
+                            {avoidancePatterns.length > 0 && (
+                                <div style={{
+                                    background: '#2a2010',
+                                    border: '1px solid #eab308',
+                                    borderRadius: '4px',
+                                    padding: '0.5rem',
+                                    marginBottom: '0.75rem',
+                                    fontSize: '0.75rem',
+                                    color: '#facc15'
+                                }}>
+                                    ⚠ Pattern: "{avoidancePatterns[0]}" started {patterns[avoidancePatterns[0]].count}x, never finished
                                 </div>
                             )}
-                            {sessions.map(s => {
-                                const duration = s.endTime - s.startTime;
-                                const mins = Math.floor(duration / 60000);
-                                return (
-                                    <div key={s.id} className="focus-session">
-                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start'}}>
-                                            <div style={{flex: 1, fontWeight: 500}}>{s.commitment}</div>
-                                            <div style={{fontSize: '1rem'}}>
-                                                {s.outcome?.rating === 1 ? '😞' : 
-                                                 s.outcome?.rating === 2 ? '😕' : 
-                                                 s.outcome?.rating === 3 ? '😐' : 
-                                                 s.outcome?.rating === 4 ? '🙂' : 
-                                                 s.outcome?.rating === 5 ? '😊' : '—'}
+
+                            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                {sessions.map(session => {
+                                    const duration = session.endTime - session.startTime;
+                                    const focusedCount = session.checkIns.filter(c => c.status === 'focused').length;
+                                    const distractedCount = session.checkIns.filter(c => c.status === 'distracted').length;
+                                    
+                                    return (
+                                        <div
+                                            key={session.id}
+                                            style={{
+                                                background: '#1a1a1a',
+                                                border: '1px solid #222',
+                                                borderRadius: '4px',
+                                                padding: '0.5rem',
+                                                marginBottom: '0.5rem',
+                                                fontSize: '0.75rem'
+                                            }}
+                                        >
+                                            <div style={{ 
+                                                fontWeight: 500, 
+                                                marginBottom: '0.25rem',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'start'
+                                            }}>
+                                                <div 
+                                                    style={{ 
+                                                        flex: 1, 
+                                                        paddingRight: '0.5rem',
+                                                        cursor: 'pointer',
+                                                        borderBottom: '1px dashed #333'
+                                                    }}
+                                                    onClick={() => {
+                                                        const newName = prompt('Rename session:', session.commitment);
+                                                        if (newName) renameSession(session.id, newName);
+                                                    }}
+                                                    title="Click to rename"
+                                                >
+                                                    {session.commitment}
+                                                </div>
+                                                <div style={{ fontSize: '1rem' }}>
+                                                    {session.outcome?.rating === 1 ? '😞' : 
+                                                     session.outcome?.rating === 2 ? '😕' : 
+                                                     session.outcome?.rating === 3 ? '😐' : 
+                                                     session.outcome?.rating === 4 ? '🙂' : 
+                                                     session.outcome?.rating === 5 ? '😊' : '—'}
+                                                </div>
+                                            </div>
+                                            <div style={{ color: '#888', fontSize: '0.7rem' }}>
+                                                {new Date(session.startTime).toLocaleDateString('en-US', { 
+                                                    month: 'short', day: 'numeric'
+                                                })} · {formatDuration(duration)}
+                                                {(focusedCount > 0 || distractedCount > 0) && (
+                                                    <span style={{ marginLeft: '0.5rem' }}>
+                                                        · ✓{focusedCount} ⚠{distractedCount}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
-                                        <div style={{color: '#888', fontSize: '0.7rem'}}>
-                                            {new Date(s.startTime).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
-                                            {mins > 0 && ` · ${mins < 60 ? mins + 'm' : Math.floor(mins/60) + 'h ' + (mins%60) + 'm'}`}
-                                            {s.checkIns.length > 0 && ` · ✓${s.checkIns.filter(c => c.status === 'focused').length} ⚠${s.checkIns.filter(c => c.status === 'distracted').length}`}
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </div>
